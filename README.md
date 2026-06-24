@@ -21,13 +21,22 @@ Plataforma web para gerenciamento de viagens, excursões e eventos em grupo. Cen
    ```sql
    CREATE DATABASE travelhub;
    ```
-3. Configure as credenciais em `src/main/resources/application.properties`
+3. Configure as credenciais em `travelhub/src/main/resources/application.properties`
 4. Execute:
    ```bash
+   cd travelhub
    ./mvnw spring-boot:run
    ```
 
 A aplicação sobe na porta **8000**.
+
+## Estrutura do repositório
+
+```
+TravelHub/
+├── docs/           # Documentação do projeto
+└── travelhub/      # Backend Spring Boot
+```
 
 ## Estrutura de pacotes
 
