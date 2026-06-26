@@ -69,7 +69,7 @@ com.travelhub.travelhub
 ## Roadmap
 
 - [x] **Sprint 1 — Fundação:** configuração do projeto, entidades JPA e mapeamento do banco
-- [ ] **Sprint 2 — CRUD:** repositórios, services e controllers para Usuários, Eventos e Participantes
+- [x] **Sprint 2 — CRUD:** repositórios, services e controllers para Usuários, Eventos e Participantes
 - [ ] **Sprint 3 — Regras de Negócio:** divisão de despesas, controle financeiro e votações
 - [ ] **Sprint 4 — Segurança:** Spring Security, autenticação JWT e controle de acesso
 - [ ] **Sprint 5 — Frontend:** React, dashboard, eventos e financeiro
