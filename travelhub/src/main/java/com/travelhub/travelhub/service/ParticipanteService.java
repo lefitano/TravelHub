@@ -34,4 +34,9 @@ public class ParticipanteService {
             })
             .orElseThrow(() -> new RuntimeException("Participante não encontrado"));
     }
+
+    public void deletar(Long id){
+        participanteRepository.deleteById(id);
+    }
+
 }
