@@ -1,7 +1,4 @@
 package com.travelhub.travelhub.controller;
-
-import com.travelhub.travelhub.service.ParticipanteService;
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,48 +12,59 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.travelhub.travelhub.model.Participante;
+import com.travelhub.travelhub.model.OpcaoVoto;
+import com.travelhub.travelhub.service.OpcaoVotoService;
+
+
+
+
+
 @RestController
-@RequestMapping("/participantes")
-public class ParticipanteController {
+@RequestMapping("/opcoesvotos")
+public class OpcaoVotoController {
     @Autowired
-    private ParticipanteService participanteService;
+    private OpcaoVotoService opcaoVotoService;
 
     @PostMapping
-    public ResponseEntity<Participante> criar(@RequestBody Participante participante){
-        Participante salvo = participanteService.salvar(participante);
+    public ResponseEntity <OpcaoVoto> salvar(@RequestBody OpcaoVoto opcaoVoto){
+        OpcaoVoto salvo = opcaoVotoService.salvar(opcaoVoto);
         return ResponseEntity.status(201).body(salvo);
     }
 
     @GetMapping
-    public ResponseEntity<List<Participante>> listarTodos(){
-        List<Participante> participantes = participanteService.listarTodos();
-        return ResponseEntity.ok(participantes);
+    public ResponseEntity <List<OpcaoVoto>> listarTodos(){
+        List <OpcaoVoto> opcoesvotos = opcaoVotoService.listarTodos();
+        return ResponseEntity.ok(opcoesvotos);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Participante> buscarPorId(@PathVariable Long id){
-        return participanteService.buscarPorId(id)
+    public ResponseEntity <OpcaoVoto> buscarPorId(@PathVariable Long id){
+        return opcaoVotoService.buscarPorId(id)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
     }
+    @GetMapping("/votacao/{votacaoId}")
+    public ResponseEntity<List<OpcaoVoto>> buscarPorVotacao(@PathVariable Long votacaoId){
+        return ResponseEntity.ok(opcaoVotoService.buscarPorVotacao(votacaoId));
+    }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Participante> atualizar(@PathVariable Long id, @RequestBody Participante participante){
+    public ResponseEntity<OpcaoVoto> atualizar(@PathVariable Long id, @RequestBody OpcaoVoto opcaoVoto){
         try{
-            Participante participanteAtualizado = participanteService.atualizar(id, participante);
-            return ResponseEntity.ok(participanteAtualizado);
-        }catch (RuntimeException e){
+            OpcaoVoto votoAtualizado = opcaoVotoService.atualizar(id, opcaoVoto);
+            return ResponseEntity.ok(votoAtualizado);
+        }catch(RuntimeException e){
             return ResponseEntity.notFound().build();
         }
     }
 
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id){
         try{
-            participanteService.deletar(id);
+            opcaoVotoService.deletar(id);
             return ResponseEntity.noContent().build();
-        } catch( RuntimeException e){
+        }catch(RuntimeException e){
             return ResponseEntity.notFound().build();
         }
     }
