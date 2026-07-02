@@ -1,4 +1,5 @@
 package com.travelhub.travelhub.controller;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.travelhub.travelhub.model.OpcaoVoto;
 import com.travelhub.travelhub.service.OpcaoVotoService;
 
-
-
-
-
 @RestController
 @RequestMapping("/opcoesvotos")
 public class OpcaoVotoController {
@@ -26,45 +23,45 @@ public class OpcaoVotoController {
     private OpcaoVotoService opcaoVotoService;
 
     @PostMapping
-    public ResponseEntity <OpcaoVoto> salvar(@RequestBody OpcaoVoto opcaoVoto){
+    public ResponseEntity<OpcaoVoto> salvar(@RequestBody OpcaoVoto opcaoVoto) {
         OpcaoVoto salvo = opcaoVotoService.salvar(opcaoVoto);
         return ResponseEntity.status(201).body(salvo);
     }
 
     @GetMapping
-    public ResponseEntity <List<OpcaoVoto>> listarTodos(){
-        List <OpcaoVoto> opcoesvotos = opcaoVotoService.listarTodos();
+    public ResponseEntity<List<OpcaoVoto>> listarTodos() {
+        List<OpcaoVoto> opcoesvotos = opcaoVotoService.listarTodos();
         return ResponseEntity.ok(opcoesvotos);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity <OpcaoVoto> buscarPorId(@PathVariable Long id){
+    public ResponseEntity<OpcaoVoto> buscarPorId(@PathVariable Long id) {
         return opcaoVotoService.buscarPorId(id)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
+
     @GetMapping("/votacao/{votacaoId}")
-    public ResponseEntity<List<OpcaoVoto>> buscarPorVotacao(@PathVariable Long votacaoId){
+    public ResponseEntity<List<OpcaoVoto>> buscarPorVotacao(@PathVariable Long votacaoId) {
         return ResponseEntity.ok(opcaoVotoService.buscarPorVotacao(votacaoId));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OpcaoVoto> atualizar(@PathVariable Long id, @RequestBody OpcaoVoto opcaoVoto){
-        try{
+    public ResponseEntity<OpcaoVoto> atualizar(@PathVariable Long id, @RequestBody OpcaoVoto opcaoVoto) {
+        try {
             OpcaoVoto votoAtualizado = opcaoVotoService.atualizar(id, opcaoVoto);
             return ResponseEntity.ok(votoAtualizado);
-        }catch(RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
-
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id){
-        try{
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        try {
             opcaoVotoService.deletar(id);
             return ResponseEntity.noContent().build();
-        }catch(RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }

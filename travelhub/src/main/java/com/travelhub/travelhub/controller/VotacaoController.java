@@ -16,54 +16,53 @@ import org.springframework.web.bind.annotation.RestController;
 import com.travelhub.travelhub.model.Votacao;
 import com.travelhub.travelhub.service.VotacaoService;
 
-
-
 @RestController
 @RequestMapping("/votacoes")
 
 public class VotacaoController {
     @Autowired
     private VotacaoService votacaoService;
-    
+
     @PostMapping
-    public ResponseEntity<Votacao> criar(@RequestBody Votacao votacao){
+    public ResponseEntity<Votacao> criar(@RequestBody Votacao votacao) {
         Votacao salva = votacaoService.salvar(votacao);
         return ResponseEntity.status(201).body(salva);
     }
 
     @GetMapping
-    public ResponseEntity <List<Votacao>> listarTodos(){
-      List<Votacao> votacoes = votacaoService.listarTodos();
-      return ResponseEntity.ok(votacoes);
+    public ResponseEntity<List<Votacao>> listarTodos() {
+        List<Votacao> votacoes = votacaoService.listarTodos();
+        return ResponseEntity.ok(votacoes);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity <Votacao> buscarPorId(@PathVariable Long id){
+    public ResponseEntity<Votacao> buscarPorId(@PathVariable Long id) {
         return votacaoService.buscarPorId(id)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
+
     @GetMapping("/evento/{eventoId}")
-    public ResponseEntity<List<Votacao>> buscarPorEvento(@PathVariable Long eventoId){
+    public ResponseEntity<List<Votacao>> buscarPorEvento(@PathVariable Long eventoId) {
         return ResponseEntity.ok(votacaoService.buscarPorEvento(eventoId));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity <Votacao> atualizar(@PathVariable Long id, @RequestBody Votacao votacao){
-        try{
+    public ResponseEntity<Votacao> atualizar(@PathVariable Long id, @RequestBody Votacao votacao) {
+        try {
             Votacao votacaoAtualizada = votacaoService.atualizar(id, votacao);
             return ResponseEntity.ok(votacaoAtualizada);
-        }catch(RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id){
-        try{
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        try {
             votacaoService.deletar(id);
             return ResponseEntity.noContent().build();
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }

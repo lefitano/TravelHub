@@ -50,12 +50,12 @@ public class DespesaService {
         List<Despesa> despesas = despesaRepository.findByEventoId(eventoId);
 
         BigDecimal total = BigDecimal.ZERO;
-        for(Despesa d : despesas){
+        for (Despesa d : despesas) {
             total = total.add(d.getValor());
         }
 
         int participantes = participanteRepository.findByEventoId(eventoId).size();
-        if(participantes == 0){
+        if (participantes == 0) {
             throw new RuntimeException("Evento sem participantes");
         }
 

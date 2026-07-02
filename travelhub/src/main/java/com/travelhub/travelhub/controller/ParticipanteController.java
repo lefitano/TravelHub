@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.travelhub.travelhub.model.Participante;
+
 @RestController
 @RequestMapping("/participantes")
 public class ParticipanteController {
@@ -23,40 +24,40 @@ public class ParticipanteController {
     private ParticipanteService participanteService;
 
     @PostMapping
-    public ResponseEntity<Participante> criar(@RequestBody Participante participante){
+    public ResponseEntity<Participante> criar(@RequestBody Participante participante) {
         Participante salvo = participanteService.salvar(participante);
         return ResponseEntity.status(201).body(salvo);
     }
 
     @GetMapping
-    public ResponseEntity<List<Participante>> listarTodos(){
+    public ResponseEntity<List<Participante>> listarTodos() {
         List<Participante> participantes = participanteService.listarTodos();
         return ResponseEntity.ok(participantes);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Participante> buscarPorId(@PathVariable Long id){
+    public ResponseEntity<Participante> buscarPorId(@PathVariable Long id) {
         return participanteService.buscarPorId(id)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Participante> atualizar(@PathVariable Long id, @RequestBody Participante participante){
-        try{
+    public ResponseEntity<Participante> atualizar(@PathVariable Long id, @RequestBody Participante participante) {
+        try {
             Participante participanteAtualizado = participanteService.atualizar(id, participante);
             return ResponseEntity.ok(participanteAtualizado);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id){
-        try{
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        try {
             participanteService.deletar(id);
             return ResponseEntity.noContent().build();
-        } catch( RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }

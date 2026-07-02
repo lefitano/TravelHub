@@ -13,36 +13,36 @@ import com.travelhub.travelhub.model.Votacao;
 @Service
 
 public class VotacaoService {
-@Autowired
+    @Autowired
     private VotacaoRepository votacaoRepository;
 
-    public Votacao salvar(Votacao votacao){
+    public Votacao salvar(Votacao votacao) {
         return votacaoRepository.save(votacao);
     }
 
-    public List <Votacao> listarTodos(){
+    public List<Votacao> listarTodos() {
         return votacaoRepository.findAll();
     }
 
-    public Optional <Votacao> buscarPorId(Long id){
+    public Optional<Votacao> buscarPorId(Long id) {
         return votacaoRepository.findById(id);
     }
 
-    public Votacao atualizar(Long id, Votacao votacaoAtualizada){
+    public Votacao atualizar(Long id, Votacao votacaoAtualizada) {
         return votacaoRepository.findById(id)
-        .map(votacao -> {
-            votacao.setTitulo(votacaoAtualizada.getTitulo());
-            return votacaoRepository.save(votacao);
-        }) 
-        .orElseThrow(() ->  new RuntimeException("Votação não encontrada")); 
-    }
-    public void deletar(Long id){
-         votacaoRepository.deleteById(id);
+                .map(votacao -> {
+                    votacao.setTitulo(votacaoAtualizada.getTitulo());
+                    return votacaoRepository.save(votacao);
+                })
+                .orElseThrow(() -> new RuntimeException("Votação não encontrada"));
     }
 
-    public List<Votacao> buscarPorEvento(Long eventoId){
+    public void deletar(Long id) {
+        votacaoRepository.deleteById(id);
+    }
+
+    public List<Votacao> buscarPorEvento(Long eventoId) {
         return votacaoRepository.findByEventoId(eventoId);
     }
-
 
 }

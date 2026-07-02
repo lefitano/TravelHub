@@ -24,56 +24,53 @@ public class DespesaController {
     private DespesaService despesaService;
 
     @PostMapping
-    public ResponseEntity<Despesa> salvar (@RequestBody Despesa despesa){
+    public ResponseEntity<Despesa> salvar(@RequestBody Despesa despesa) {
         Despesa despesaSalva = despesaService.salvar(despesa);
         return ResponseEntity.status(201).body(despesaSalva);
     }
 
     @GetMapping
-    public ResponseEntity<List<Despesa>> listar(){
-        List <Despesa> despesas = despesaService.listarTodos();
+    public ResponseEntity<List<Despesa>> listar() {
+        List<Despesa> despesas = despesaService.listarTodos();
         return ResponseEntity.ok(despesas);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Despesa> buscarPorId(@PathVariable Long id){
+    public ResponseEntity<Despesa> buscarPorId(@PathVariable Long id) {
         return despesaService.buscarPorId(id)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Despesa> atualizar(@PathVariable Long id, @RequestBody Despesa despesa){
-        try{
+    public ResponseEntity<Despesa> atualizar(@PathVariable Long id, @RequestBody Despesa despesa) {
+        try {
             Despesa despesaAtualizada = despesaService.atualizar(id, despesa);
             return ResponseEntity.ok(despesaAtualizada);
-        } catch(RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id){
-        try{
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        try {
             despesaService.deletar(id);
             return ResponseEntity.noContent().build();
-        }catch(RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @GetMapping("/divisao/{eventoId}")
 
-    public ResponseEntity<BigDecimal> calcularDivisao(@PathVariable Long eventoId){
-        try{
+    public ResponseEntity<BigDecimal> calcularDivisao(@PathVariable Long eventoId) {
+        try {
             BigDecimal valorPorPessoa = despesaService.calcularDivisao(eventoId);
             return ResponseEntity.ok(valorPorPessoa);
-        }catch(RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
-    
-
-
-    
 }
