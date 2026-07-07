@@ -71,7 +71,7 @@ com.travelhub.travelhub
 - [x] **Sprint 1 — Fundação:** configuração do projeto, entidades JPA e mapeamento do banco
 - [x] **Sprint 2 — CRUD:** repositórios, services e controllers para Usuários, Eventos e Participantes
 - [x] **Sprint 3 — Regras de Negócio:** divisão de despesas, controle financeiro e votações
-- [ ] **Sprint 4 — Segurança:** Spring Security, autenticação JWT e controle de acesso
+- [x] **Sprint 4 — Segurança:** Spring Security, autenticação JWT e controle de acesso
 - [ ] **Sprint 5 — Frontend:** React, dashboard, eventos e financeiro
 - [ ] **Sprint 6 — Deploy:** Docker e ambiente de produção
 
