@@ -2,8 +2,8 @@ import { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext();
 
-export default function AuthProvider({children}){
-    const [token, setToken] = useState(localStorage);
+export function AuthProvider({children}){
+    const [token, setToken] = useState(localStorage.getItem('token'));
 
     function login(novoToken){
         setToken(novoToken);
