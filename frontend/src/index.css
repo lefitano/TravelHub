@@ -79,3 +79,42 @@ body{
   box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.4) !important;
 }
 
+.footer{
+  background-color: var(--cor-navbar-footer) !important;
+  color:#ffffff !important;
+  padding: 24px 0;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.cards-funcionalidades{
+  border: 1px solid var(--cor-borda-sutil);
+  border-radius: 12px;
+  text-align: center;
+  padding: 8px;
+  transition: all 0.3s ease !important;
+  cursor: pointer;
+}
+
+.cards-funcionalidades:hover{
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgb(255, 182, 93);
+  border-color: var(--cor-hover-botoes-logo);
+}
+
+.intro{
+  color: var(--cor-textos-suaves);
+  text-align: center;
+  font-size: 1.1rem;
+  margin-bottom:2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#sobre h2{
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--cor-hover-botoes-logo);
+}
