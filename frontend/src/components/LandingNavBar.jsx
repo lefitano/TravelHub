@@ -13,12 +13,16 @@ function LandingNavBar() {
       style={{ backgroundColor: "var(--cor-navbar-footer)" }}
     >
       <Container>
-        <Navbar.Brand href="#home" className="logo-gradiente">TravelHub</Navbar.Brand>
+        <Navbar.Brand href="#home" className="logo-gradiente">
+          TravelHub
+        </Navbar.Brand>
         <Navbar.Toggle aria-controls="opcoes-basicas" />
         <Navbar.Collapse id="opcoes-basicas">
           <Nav className="ms-auto">
             <Nav.Link href="#sobre">Sobre</Nav.Link>
-            <Button className="btn-laranja" onClick={() => navigate("/auth")}>Comece já</Button>
+            <Button className="btn-laranja" onClick={() => navigate("/auth")}>
+              Comece já
+            </Button>
           </Nav>
         </Navbar.Collapse>
       </Container>
