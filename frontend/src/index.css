@@ -118,3 +118,43 @@ body{
   padding-top: 1rem;
   border-top: 2px solid var(--cor-hover-botoes-logo);
 }
+
+.card-auth{
+  border: 1px solid var(--cor-borda-sutil) !important;
+  padding: 16px;
+  margin-top: 10px;
+  margin: 0 auto;
+  max-width: 420px;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+
+}
+
+.auth-page{
+  display: flex;
+  flex-direction: column; 
+  justify-content: center;
+  align-items: center;
+  padding: 80px 0;
+}
+
+.auth-titulo{
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 1.0rem;
+  font-family: 'Raleway', sans-serif;
+  color: var(--cor-hover-botoes);
+  font-weight: 600;
+}
+
+.link-cadastro{
+  color: var(--cor-hover-botoes-logo);
+  cursor: pointer;
+  font-weight: 600;
+}
+.link-cadastro:hover{
+  color:var(--cor-hover-botoes);
+  text-decoration: underline;
+}
+
+  
