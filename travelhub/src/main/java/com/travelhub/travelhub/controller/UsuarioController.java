@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.travelhub.travelhub.dto.UsuarioResponseDTO;
 import com.travelhub.travelhub.model.Usuario;
 import com.travelhub.travelhub.service.UsuarioService;
 
@@ -23,28 +24,35 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @PostMapping
-    public ResponseEntity<Usuario> criar(@RequestBody Usuario usuario){
+    public ResponseEntity<UsuarioResponseDTO> criar(@RequestBody Usuario usuario){
         Usuario salvo = usuarioService.salvar(usuario);
-        return ResponseEntity.status(201).body(salvo);
+        UsuarioResponseDTO dto = new UsuarioResponseDTO(salvo.getId(), salvo.getNome(), salvo.getEmail(), salvo.getDataCadastro());
+        return ResponseEntity.status(201).body(dto);
     }
     @GetMapping
-    public ResponseEntity<List<Usuario>> listarTodos(){
+    public ResponseEntity<List<UsuarioResponseDTO>> listarTodos(){
         List<Usuario> usuarios = usuarioService.listarTodos();
-        return ResponseEntity.ok(usuarios);
+        List<UsuarioResponseDTO> dtos = usuarios.stream()
+        .map(u -> new UsuarioResponseDTO(u.getId(), u.getNome(), u.getEmail(), u.getDataCadastro()))
+        .toList();
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> buscarPorId(@PathVariable Long id){
+    public ResponseEntity<UsuarioResponseDTO> buscarPorId(@PathVariable Long id){
         return usuarioService.buscarPorId(id)
-        .map(ResponseEntity::ok)
+        .map(u -> ResponseEntity.ok(
+            new UsuarioResponseDTO(u.getId(), u.getNome(), u.getEmail(), u.getDataCadastro())
+        ))
         .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> atualizar(@PathVariable Long id, @RequestBody Usuario usuario){
+    public ResponseEntity<UsuarioResponseDTO> atualizar(@PathVariable Long id, @RequestBody Usuario usuario){
         try{
             Usuario atualizado = usuarioService.atualizar(id, usuario);
-            return ResponseEntity.ok(atualizado);
+            UsuarioResponseDTO dto = new UsuarioResponseDTO(atualizado.getId(), atualizado.getNome(), atualizado.getEmail(), atualizado.getDataCadastro());
+            return ResponseEntity.ok(dto);
 
         } catch (RuntimeException e){
             return ResponseEntity.notFound().build();
