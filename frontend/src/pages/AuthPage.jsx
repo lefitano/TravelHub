@@ -14,7 +14,7 @@ export default function AuthPage() {
           <h2 className="auth-titulo">TravelHub</h2>
           <Card className="card-auth">
             <Card.Body>
-              <Form>
+              <Form onSubmit={e => e.preventDefault()}>
                 {modo === 'login' ? (
                   <>
                     <Form.Group className="mb-3" controlId="form-email">

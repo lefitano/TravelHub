@@ -13,7 +13,7 @@ function LandingNavBar() {
       style={{ backgroundColor: "var(--cor-navbar-footer)" }}
     >
       <Container>
-        <Navbar.Brand href="#home" className="logo-gradiente">
+        <Navbar.Brand onClick={() => navigate('/')} style={{cursor: 'pointer'}} className="logo-gradiente">
           TravelHub
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="opcoes-basicas" />

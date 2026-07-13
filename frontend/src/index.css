@@ -122,7 +122,6 @@ body{
 .card-auth{
   border: 1px solid var(--cor-borda-sutil) !important;
   padding: 16px;
-  margin-top: 10px;
   margin: 0 auto;
   max-width: 420px;
   border-radius: 16px !important;
