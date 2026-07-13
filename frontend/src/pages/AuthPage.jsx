@@ -1,11 +1,49 @@
 import AuthNavBar from "../components/AuthNavBar";
 import { useState } from "react";
+import {useNavigate } from "react-router-dom";
+import {useAuth} from '../context/AuthContext';
+import {login as loginService} from '../services/authService';
 import Card from "react-bootstrap/Card";
 import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
+import api from '../services/api';
 export default function AuthPage() {
   const [modo, setModo] = useState("login");
+  const navigate = useNavigate();
+  const {login} = useAuth();
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [erro, setErro] = useState('');
+  const [nome, setNome] = useState('');
+  const [emailCadastro, setEmailCadastro] = useState('');
+  const [senhaCadastro, setSenhaCadastro] = useState('');
+  const [erroCadastro, setErroCadastro] = useState('');
+  const [sucessoCadastro, setSucessoCadastro] = useState('');
+
+  async function handleLogin(e){
+    e.preventDefault()
+    setErro('')
+    try{
+      const resposta = await loginService(email,senha)
+      login (resposta.data.token)
+      navigate('/dashboard')
+    } catch(error){
+      setErro('Email ou senha incorretos.')
+    }
+  }
+  async function handleCadastro(e){
+    e.preventDefault();
+    setErroCadastro('')
+    try{
+      await api.post('/usuarios' , {nome, email: emailCadastro, senha: senhaCadastro})
+      setSucessoCadastro('Cadastro realizado! Faça seu login.' )
+      setModo('login')
+    }catch(error){
+      setErroCadastro('Erro ao cadastrar. Verifique os dados e tente novamente')
+    }
+  }
+
   return (
     <>
       <AuthNavBar onCadastrar={() => setModo("cadastro")} />
@@ -14,12 +52,12 @@ export default function AuthPage() {
           <h2 className="auth-titulo">TravelHub</h2>
           <Card className="card-auth">
             <Card.Body>
-              <Form onSubmit={e => e.preventDefault()}>
+              <Form onSubmit={modo === 'login' ? handleLogin: handleCadastro}>
                 {modo === 'login' ? (
                   <>
                     <Form.Group className="mb-3" controlId="form-email">
                       <Form.Label>Digite seu email de cadastro:</Form.Label>
-                      <Form.Control type="email" placeholder="Seu email" />
+                      <Form.Control type="email" placeholder="Seu email" value={email} onChange={e => setEmail(e.target.value)}/>
                       <Form.Text className="text-muted">
                         Não compartilhe seus dados de cadastro com ninguém.
                       </Form.Text>
@@ -27,12 +65,13 @@ export default function AuthPage() {
 
                     <Form.Group className="mb-3" controlId="form-senha">
                       <Form.Label>Digite sua senha:</Form.Label>
-                      <Form.Control type="password" placeholder="Senha" />
+                      <Form.Control type="password" placeholder="Senha" value={senha} onChange={e => setSenha(e.target.value)} />
                     </Form.Group>
 
                     <Button className="btn-laranja w-100" type="submit">
                       Entrar
                     </Button>
+                    {erro && <p style={{color: 'red' , fontSize:'0.85rem', textAlign: 'center'}}>{erro}</p>}
 
                     <p className="text-center mt-3" style={{fontSize:'0.85rem', color:'var(--cor-textos-suaves)'}}>
                       Não possui cadastro?{' '}
@@ -45,24 +84,25 @@ export default function AuthPage() {
                   <>
                     <Form.Group className="mb-3" controlId="form-nome-cadastro">
                       <Form.Label>Digite seu nome completo:</Form.Label>
-                      <Form.Control type='text' placeholder="Seu nome" />
+                      <Form.Control type='text' placeholder="Seu nome" value={nome} onChange={e => setNome(e.target.value)}/>
                     </Form.Group>
 
                     <Form.Group className="mb-3" controlId="form-email-cadastro">
                       <Form.Label>Digite seu email para cadastro:</Form.Label>
-                      <Form.Control type='email' placeholder="Seu email" />
+                      <Form.Control type='email' placeholder="Seu email" value={emailCadastro} onChange={e => setEmailCadastro(e.target.value)}/>
                     </Form.Group>
 
                     <Form.Group className="mb-3" controlId="form-senha-cadastro">
                       <Form.Label>Digite sua senha para cadastro:</Form.Label>
-                      <Form.Control type='password' placeholder="Senha" />
+                      <Form.Control type='password' placeholder="Senha" value={senhaCadastro} onChange={e => setSenhaCadastro(e.target.value)}/>
                       <Form.Text className="text-muted">
                         Não compartilhe seus dados de cadastro com ninguém.
                       </Form.Text>
                     </Form.Group>
 
                     <Button className="btn-laranja w-100" type="submit">Cadastrar</Button>
-
+                    {erroCadastro && <p style={{color: 'red', fontSize: '0.85rem', textAlign: 'center'}}>{erroCadastro}</p>}
+                    {sucessoCadastro && <p style={{color: 'green', fontSize: '0.85rem', textAlign: 'center'}}>{sucessoCadastro}</p>}
                     <p className="text-center mt-3" style={{fontSize: '0.85rem', color:'var(--cor-textos-suaves)'}}>
                       Já tem conta?{' '}
                       <span className="link-cadastro" onClick={() => setModo('login')}>
