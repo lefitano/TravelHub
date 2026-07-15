@@ -11,4 +11,5 @@ import com.travelhub.travelhub.model.Participante;
 public interface ParticipanteRepository extends JpaRepository<Participante, Long> {
 
     List<Participante> findByEventoId(Long eventoId);
+    List<Participante> findByUsuarioEmail(String email);
 } 

@@ -1,5 +1,6 @@
 package com.travelhub.travelhub.controller;
 
+import java.util.stream.Collectors;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.security.core.context.SecurityContextHolder;
 import com.travelhub.travelhub.service.EventoService;
 import com.travelhub.travelhub.model.Evento;
 
@@ -25,13 +26,21 @@ public class EventoController {
 
     @PostMapping
     public ResponseEntity<Evento> salvar(@RequestBody Evento evento){
-        Evento eventoSalvo = eventoService.salvar(evento);
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Evento eventoSalvo = eventoService.salvar(evento, email);
         return ResponseEntity.status(201).body(eventoSalvo);
     }
 
     @GetMapping
     public ResponseEntity<List<Evento>> listar(){
         List <Evento> eventos = eventoService.listarTodos();
+        return ResponseEntity.ok(eventos);
+    }
+
+    @GetMapping("/meus")
+    public ResponseEntity<List<Evento>> listarMeus(){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        List<Evento> eventos = eventoService.listarPorUsuario(email);
         return ResponseEntity.ok(eventos);
     }
     @GetMapping("/{id}")
