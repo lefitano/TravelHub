@@ -18,7 +18,12 @@ export default function AuthPage() {
   const [nome, setNome] = useState('');
   const [emailCadastro, setEmailCadastro] = useState('');
   const [senhaCadastro, setSenhaCadastro] = useState('');
-  const [erroCadastro, setErroCadastro] = useState('');
+  const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [erroNome, setErroNome] = useState('');
+  const [erroEmailCadastro, setErroEmailCadastro] = useState('');
+  const [erroSenhaCadastro, setErroSenhaCadastro] = useState('');
+  const [erroConfirmarSenha, setErroConfirmarSenha] = useState('');
+  const [erroCadastroApi, setErroCadastroApi] = useState('');
   const [sucessoCadastro, setSucessoCadastro] = useState('');
 
   async function handleLogin(e){
@@ -34,14 +39,50 @@ export default function AuthPage() {
   }
   async function handleCadastro(e){
     e.preventDefault();
-    setErroCadastro('')
+    if(!validarCadastro()){
+      return;
+    }
+    setErroCadastroApi('')
     try{
       await api.post('/usuarios' , {nome, email: emailCadastro, senha: senhaCadastro})
       setSucessoCadastro('Cadastro realizado! Faça seu login.' )
       setModo('login')
     }catch(error){
-      setErroCadastro('Erro ao cadastrar. Verifique os dados e tente novamente')
+      setErroCadastroApi('Erro ao cadastrar. Verifique os dados e tente novamente')
     }
+  }
+
+  function validarCadastro(){
+    let valido = true;
+
+    setErroNome('');
+    setErroEmailCadastro('');
+    setErroSenhaCadastro('');
+    setErroConfirmarSenha('');
+    setErroCadastroApi('');
+
+
+    if(nome.trim().length < 3){
+      setErroNome('Nome deve ter pelo menos 3 caracteres');
+      valido = false;
+    }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if(!emailRegex.test(emailCadastro)){
+        setErroEmailCadastro("Digite um email válido!");
+        valido = false;
+      }
+
+      if(senhaCadastro.length < 6){
+        setErroSenhaCadastro("A senha deve ter pelo menos 6 caracteres!");
+        valido = false;
+      }
+
+      if(senhaCadastro !== confirmarSenha){
+        setErroConfirmarSenha("As senhas não coincidem, por favor verificar!");
+        valido = false;
+      }
+      return valido;
   }
 
   return (
@@ -67,7 +108,7 @@ export default function AuthPage() {
                       <Form.Label>Digite sua senha:</Form.Label>
                       <Form.Control type="password" placeholder="Senha" value={senha} onChange={e => setSenha(e.target.value)} />
                     </Form.Group>
-
+            
                     <Button className="btn-laranja w-100" type="submit">
                       Entrar
                     </Button>
@@ -86,11 +127,13 @@ export default function AuthPage() {
                       <Form.Label>Digite seu nome completo:</Form.Label>
                       <Form.Control type='text' placeholder="Seu nome" value={nome} onChange={e => setNome(e.target.value)}/>
                     </Form.Group>
+                    {erroNome && <p style={{color: 'red', fontSize:'0.8rem'}}>{erroNome}</p>}
 
                     <Form.Group className="mb-3" controlId="form-email-cadastro">
                       <Form.Label>Digite seu email para cadastro:</Form.Label>
                       <Form.Control type='email' placeholder="Seu email" value={emailCadastro} onChange={e => setEmailCadastro(e.target.value)}/>
                     </Form.Group>
+                    {erroEmailCadastro && <p style={{color: 'red', fontSize:'0.8rem'}}>{erroEmailCadastro}</p>}
 
                     <Form.Group className="mb-3" controlId="form-senha-cadastro">
                       <Form.Label>Digite sua senha para cadastro:</Form.Label>
@@ -98,10 +141,17 @@ export default function AuthPage() {
                       <Form.Text className="text-muted">
                         Não compartilhe seus dados de cadastro com ninguém.
                       </Form.Text>
+                      {erroSenhaCadastro && <p style={{color: 'red', fontSize:'0.8rem'}}>{erroSenhaCadastro}</p>}
                     </Form.Group>
+                    <Form.Group className="mb-3" controlId="form-confirmar-senha">
+                      <Form.Label>Digite novamente sua senha:</Form.Label>
+                      <Form.Control type="password" placeholder="Confirme sua senha" value={confirmarSenha} onChange={e => setConfirmarSenha(e.target.value)}
+                      />
+                    </Form.Group>
+                    {erroConfirmarSenha && <p style={{color: 'red', fontSize:'0.8rem'}}>{erroConfirmarSenha}</p>}
 
                     <Button className="btn-laranja w-100" type="submit">Cadastrar</Button>
-                    {erroCadastro && <p style={{color: 'red', fontSize: '0.85rem', textAlign: 'center'}}>{erroCadastro}</p>}
+                    {erroCadastroApi && <p style={{color: 'red', fontSize: '0.85rem', textAlign: 'center'}}>{erroCadastroApi}</p>}
                     {sucessoCadastro && <p style={{color: 'green', fontSize: '0.85rem', textAlign: 'center'}}>{sucessoCadastro}</p>}
                     <p className="text-center mt-3" style={{fontSize: '0.85rem', color:'var(--cor-textos-suaves)'}}>
                       Já tem conta?{' '}
