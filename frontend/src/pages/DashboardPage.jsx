@@ -67,7 +67,11 @@ export default function DashBoardPage(){
             </Card>
             )}
             {/* card de total de eventos */}
-            <div className='mt-3' style={{display:'flex', gap:'1rem'}}>
+            <h2 style={{ fontFamily: 'Raleway, sans-serif', fontWeight: 900, fontSize: '2rem' }}>
+    Meus Eventos
+</h2>
+
+            <div className='card-evento' style={{display:'flex', gap:'1rem'}}>
                 <div style={{backgroundColor: "#f5f5f5", borderRadius:'8px', padding:'1rem 1.5rem', flex:1, border:'2px solid rgb(255, 185, 127)'}}>
                     <p style={{margin : 0, color: "#6b7280", fontSize: '0.8rem'}}>Total de eventos</p>
                     <p style={{margin: 0, color: "#ff6b35", fontSize:'2.0rem', fontWeight:700}}>
@@ -79,9 +83,6 @@ export default function DashBoardPage(){
         <hr style={{ border: 'none', borderTop: '1px solid #e5e7eb', margin: '1.5rem 0 0' }} />
 
         <Container className='mt-5'>
-        <h2 style={{ fontFamily: 'Raleway, sans-serif', fontWeight: 900, fontSize: '2rem' }}>
-    Meus Eventos
-</h2>
 
 {eventos.length === 0 ? (
     <p style={{ color: '#6b7280', marginTop: '1rem' }}>
