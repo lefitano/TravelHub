@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.travelhub.travelhub.dto.LoginRequest;
 import com.travelhub.travelhub.dto.LoginResponse;
+import com.travelhub.travelhub.repository.UsuarioRepository;
 import com.travelhub.travelhub.security.JwtUtil;
 
 @RestController
@@ -24,6 +25,9 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
         try {
@@ -33,7 +37,10 @@ public class AuthController {
 
             String email = authentication.getName();
             String token = jwtUtil.gerarToken(email);
-            return ResponseEntity.ok(new LoginResponse(token));
+            String nome = usuarioRepository.findByEmail(email)
+            .map(u -> u.getNome())
+            .orElse("");
+            return ResponseEntity.ok(new LoginResponse(token, nome));
         } catch (Exception e) {
             return ResponseEntity.status(401).build();
         }

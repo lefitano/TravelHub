@@ -31,7 +31,7 @@ export default function AuthPage() {
     setErro('')
     try{
       const resposta = await loginService(email,senha)
-      login (resposta.data.token)
+      login (resposta.data.token, resposta.data.nome)
       navigate('/dashboard')
     } catch(error){
       setErro('Email ou senha incorretos.')
