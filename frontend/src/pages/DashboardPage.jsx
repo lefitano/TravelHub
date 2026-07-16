@@ -14,6 +14,7 @@ export default function DashBoardPage(){
   const [eventos, setEventos] = useState([]);
   const navigate = useNavigate();
   const {nome} = useAuth();
+  
 
     useEffect(() =>{
         async function carregarDados() {
@@ -26,37 +27,57 @@ export default function DashBoardPage(){
         .filter(e => new Date(e.dataInicio) >= new Date())
         .sort((a, b) => new Date(a.dataInicio) - new Date(b.dataInicio)) [0];
 
+        const hoje = new Date().toLocaleDateString('pt-BR',{
+            weekday:'long',
+            day:'numeric',
+            month:'long',
+            year: 'numeric'
+          })
+
     return(
         <>
         <NavBar/>
+        <hr style={{border:'none', borderTop:'1px solid rgb(255, 162, 0)', margin: '0' }}></hr>
+        <div style={{ backgroundColor: '#111111', padding: '2.5rem 2rem' }}>
+    <Container>
+        <p style={{ color: '#6b7280', margin: 0, fontSize: '0.9rem', textTransform: 'capitalize' }}>
+            {hoje}
+        </p>
+        <h2 style={{ color: '#ffffff', fontFamily: 'Raleway, sans-serif', fontWeight: 700, margin: '0.25rem 0 0' }}>
+            Olá, <span style={{ color: '#ff6b35' }}>{nome}</span>!
+        </h2>
+        <p style={{ color: '#6b7280', margin: '0.25rem 0 0', fontSize: '0.95rem' }}>
+            Bem-vindo de volta ao TravelHub.
+        </p>
+    </Container>
+</div>
+        <hr style={{border:'none', borderTop:'1px solid rgb(255, 162, 0)', margin: '0' }}></hr>
         <Container className="mt-4">
-            <h2 style={{fontFamily: 'Raleway, sans-serif', fontWeight: 700}}>Olá {nome} </h2>
-            <p style={{color: '#6b7280'}}>Seja bem vindo</p>
-
             {proximoEvento && (
-                <Card className="mt-3" style={{backgroundColor: '#f5f5f5', border:'2px solid #ff6b35'}}>
-                    <Card.Body>
-                        <Card.Subtitle className='mb-1' style={{color:'#ff6b35', fontWeight:600}}>
-                            Seu próximo evento
-                        </Card.Subtitle>
-                        <Card.Title style={{fontWeight:700}}>
-                            {proximoEvento.nome}
-                        </Card.Title>
-                        <Card.Text style={{color: '#6b7280' , fontSize:'0.9rem' }}>
-                            {proximoEvento.destino} · {proximoEvento.dataInicio} → {proximoEvento.dataFim}
-                        </Card.Text>
-                    </Card.Body>
-                </Card>
+            <Card className="mb-3" style={{backgroundColor:'#f5f5f5', border: '2px solid #ff6b35'}}>
+                <Card.Body>
+                    <Card.Subtitle className='mb-1' style={{color:'#ff6b35', fontWeight:'600'}}>
+                        Seu próximo evento
+                    </Card.Subtitle>
+                    <Card.Title style={{fontWeight:'700'}}>{proximoEvento.nome}</Card.Title>
+                    <Card.Text style={{color: '#6b7280', fontSize: '0.9rem'}}>
+                        {proximoEvento.destino} · {proximoEvento.dataInicio} → {proximoEvento.dataFim}
+                    </Card.Text>
+                </Card.Body>
+            </Card>
             )}
-            <div className="mt-4 p-3" style={{backgroundColor:'#f5f5f5', borderRadius:'8px'}}>
-                <p style={{margin : 0, color: '#111111'}}>
-                    Já tem um novo planejamento em mente? {''}
-                </p>
-                <Button className="btn-laranja mt-2" onClick={() => navigate('/eventos')}>
-                    Criar Planejamento
-                </Button>
+            {/* card de total de eventos */}
+            <div className='mt-3' style={{display:'flex', gap:'1rem'}}>
+                <div style={{backgroundColor: "#f5f5f5", borderRadius:'8px', padding:'1rem 1.5rem', flex:1, border:'2px solid rgb(255, 185, 127)'}}>
+                    <p style={{margin : 0, color: "#6b7280", fontSize: '0.8rem'}}>Total de eventos</p>
+                    <p style={{margin: 0, color: "#ff6b35", fontSize:'2.0rem', fontWeight:700}}>
+                        {eventos.length}
+                    </p>
+                </div>
             </div>
-        </Container>
+        </Container>  
+        <hr style={{ border: 'none', borderTop: '1px solid #e5e7eb', margin: '1.5rem 0 0' }} />
+
         <Container className='mt-5'>
         <h2 style={{ fontFamily: 'Raleway, sans-serif', fontWeight: 900, fontSize: '2rem' }}>
     Meus Eventos
@@ -71,7 +92,7 @@ export default function DashBoardPage(){
         {eventos.map(evento => (
             <Col md={4} key={evento.id}>
                 <Card
-                    style={{ backgroundColor: '#f5f5f5', border: 'none', cursor: 'pointer' }}
+                    className="card-evento"
                     onClick={() => navigate(`/eventos/${evento.id}`)}
                 >
                     <Card.Body>
@@ -90,6 +111,16 @@ export default function DashBoardPage(){
         ))}
     </Row>
 )}
+
+<div className="mt-4 p-3" style={{backgroundColor:'#f5f5f5', borderRadius:'8px', border:'2px solid rgb(255, 185, 127)', maxWidth:'400px'}}>
+                
+                <p style={{margin : 0, color: '#111111'}}>
+                    Já tem um novo planejamento em mente? {''}
+                </p>
+                <Button className="btn-laranja mt-2" onClick={() => navigate('/eventos')}>
+                    Criar Planejamento
+                </Button>
+            </div>
         </Container>
         </>
     )
