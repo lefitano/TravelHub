@@ -48,7 +48,6 @@ export default function EventosPage(){
             }catch (error){
                 setErroForm("Erro ao criar evento. Verifique os dados");
             }
-        }
     }
 
     return(
