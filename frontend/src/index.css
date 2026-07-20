@@ -156,9 +156,8 @@ body{
   text-decoration: underline;
 }
 .card-evento{
-  border-left: none !important;
-  border-right: none  !important;
-  border-bottom: none !important;
+  border: 0.5px solid #e5e7eb !important;
+  border-top: 3px solid #ff6b35 !important;
   transition: box-shadow 0.2s ease, transform 0.2s ease !important;
   cursor: pointer;
 }
@@ -169,6 +168,16 @@ body{
 }
 .cabeçalho-meuseventos{
  
+}
+
+.form-criar-evento{
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  background-color: #f5f5f5;
 }
 
   
