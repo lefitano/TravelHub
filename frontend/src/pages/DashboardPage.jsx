@@ -71,7 +71,7 @@ export default function DashBoardPage(){
     Meus Eventos
 </h2>
 
-            <div className='card-evento' style={{display:'flex', gap:'1rem'}}>
+            <div style={{display:'flex', gap:'1rem'}}>
                 <div style={{backgroundColor: "#f5f5f5", borderRadius:'8px', padding:'1rem 1.5rem', flex:1, border:'2px solid rgb(255, 185, 127)'}}>
                     <p style={{margin : 0, color: "#6b7280", fontSize: '0.8rem'}}>Total de eventos</p>
                     <p style={{margin: 0, color: "#ff6b35", fontSize:'2.0rem', fontWeight:700}}>
