@@ -19,13 +19,19 @@ export default function EventosPage() {
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
   const [erroForm, setErroForm] = useState("");
+  const [erroCarregamento, setErroCarregamento] = useState('');
 
   const navigate = useNavigate();
 
   useEffect(() => {
     async function carregarEventos() {
+      try{
       const resposta = await api.get("/eventos/meus");
       setEventos(resposta.data);
+      }
+      catch(erro){
+        setErroCarregamento("Não foi possível carregar os eventos")
+      }
     }
     carregarEventos();
   }, []);
@@ -170,7 +176,11 @@ export default function EventosPage() {
           )}
 
           {!mostrarForm && (
-            <div className="mt-4">
+            <>
+              {erroCarregamento && (
+                <p style={{ color: "red", fontSize: "0.85rem" }}>{erroCarregamento}</p>
+              )}
+              <div className="mt-4">
               {eventos.length === 0 ? (
                 <p style={{ color: "#6b7280" }}>
                   Você ainda não tem eventos. Crie o primeiro!
@@ -192,7 +202,7 @@ export default function EventosPage() {
                             {evento.destino}
                           </Card.Text>
                           <Card.Text style={{ color: "#ff6b35", fontSize: "0.85rem" }}>
-                            {evento.dataInicio} → {evento.dataFim}
+                            {evento.dataInicio.split('-').reverse().join('/')} → {evento.dataFim.split('-').reverse().join('/')}
                           </Card.Text>
                         </Card.Body>
                       </Card>
@@ -201,6 +211,7 @@ export default function EventosPage() {
                 </Row>
               )}
             </div>
+            </>
           )}
         </Container>
       </div>
