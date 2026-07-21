@@ -39,10 +39,6 @@ public class EventoService {
 
     }
 
-    public List<Evento> listarTodos() {
-        return eventoRepository.findAll();
-    }
-
     public Optional<Evento> buscarPorId(Long id) {
         return eventoRepository.findById(id);
     }

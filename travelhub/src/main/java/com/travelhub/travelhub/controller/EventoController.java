@@ -1,6 +1,5 @@
 package com.travelhub.travelhub.controller;
 
-import java.util.stream.Collectors;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +28,6 @@ public class EventoController {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Evento eventoSalvo = eventoService.salvar(evento, email);
         return ResponseEntity.status(201).body(eventoSalvo);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<Evento>> listar(){
-        List <Evento> eventos = eventoService.listarTodos();
-        return ResponseEntity.ok(eventos);
     }
 
     @GetMapping("/meus")
