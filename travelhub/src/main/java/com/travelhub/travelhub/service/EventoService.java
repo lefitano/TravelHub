@@ -58,6 +58,9 @@ public class EventoService {
     }
 
     public void deletar(Long id) {
+        participanteRepository.deleteAll(
+            participanteRepository.findByEventoId(id)
+        );
         eventoRepository.deleteById(id);
     }
 
