@@ -70,4 +70,9 @@ public class EventoService {
         .map(Participante::getEvento)
         .collect(Collectors.toList());
     }
+    public boolean usuarioParticipa(Long eventoId, String email){
+        return participanteRepository.findByEventoId(eventoId)
+        .stream()
+        .anyMatch(p -> p.getUsuario().getEmail().equals(email));
+    }
 }

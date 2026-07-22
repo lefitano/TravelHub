@@ -3,9 +3,11 @@ package com.travelhub.travelhub.controller;
 import com.travelhub.travelhub.service.ParticipanteService;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,11 +56,15 @@ public class ParticipanteController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        try {
-            participanteService.deletar(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Participante> participante = participanteService.buscarPorId(id);
+        if(participante.isEmpty()){
             return ResponseEntity.notFound().build();
         }
+        if(!participante.get().getUsuario().getEmail().equals(email)){
+            return ResponseEntity.status(403).build();
+        }
+        participanteService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -16,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.travelhub.travelhub.service.EventoService;
 import com.travelhub.travelhub.model.Evento;
 
-
 @RestController
 @RequestMapping("/eventos")
 public class EventoController {
@@ -24,45 +23,51 @@ public class EventoController {
     private EventoService eventoService;
 
     @PostMapping
-    public ResponseEntity<Evento> salvar(@RequestBody Evento evento){
+    public ResponseEntity<Evento> salvar(@RequestBody Evento evento) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Evento eventoSalvo = eventoService.salvar(evento, email);
         return ResponseEntity.status(201).body(eventoSalvo);
     }
 
     @GetMapping("/meus")
-    public ResponseEntity<List<Evento>> listarMeus(){
+    public ResponseEntity<List<Evento>> listarMeus() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         List<Evento> eventos = eventoService.listarPorUsuario(email);
         return ResponseEntity.ok(eventos);
     }
+
     @GetMapping("/{id}")
-    public ResponseEntity <Evento> buscarPorId(@PathVariable Long id){
+    public ResponseEntity<Evento> buscarPorId(@PathVariable Long id) {
         return eventoService.buscarPorId(id)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
+
     @PutMapping("/{id}")
-    public ResponseEntity<Evento> atualizar(@PathVariable Long id, @RequestBody Evento evento){
-        try{
+    public ResponseEntity<Evento> atualizar(@PathVariable Long id, @RequestBody Evento evento) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!eventoService.usuarioParticipa(id, email)) {
+            return ResponseEntity.status(403).build();
+        }
+        try {
             Evento atualizado = eventoService.atualizar(id, evento);
             return ResponseEntity.ok(atualizado);
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id){
-        try{
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!eventoService.usuarioParticipa(id, email)) {
+            return ResponseEntity.status(403).build();
+        }
+        try {
             eventoService.deletar(id);
             return ResponseEntity.noContent().build();
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
 }
-
-
-
-
