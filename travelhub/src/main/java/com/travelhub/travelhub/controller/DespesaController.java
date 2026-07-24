@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,8 +15,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.travelhub.travelhub.dto.AddDespesaDTO;
 import com.travelhub.travelhub.model.Despesa;
 import com.travelhub.travelhub.service.DespesaService;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/despesas")
@@ -24,9 +28,15 @@ public class DespesaController {
     private DespesaService despesaService;
 
     @PostMapping
-    public ResponseEntity<Despesa> salvar(@RequestBody Despesa despesa) {
-        Despesa despesaSalva = despesaService.salvar(despesa);
-        return ResponseEntity.status(201).body(despesaSalva);
+    public ResponseEntity<Despesa> salvar(@RequestBody AddDespesaDTO dto) {
+        try {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            Despesa salva = despesaService.criarDespesa(dto, email);
+            return ResponseEntity.status(201).body(salva);
+
+        }catch(RuntimeException e){
+            return ResponseEntity.status(404).build();
+        }
     }
 
     @GetMapping
@@ -63,7 +73,6 @@ public class DespesaController {
     }
 
     @GetMapping("/divisao/{eventoId}")
-
     public ResponseEntity<BigDecimal> calcularDivisao(@PathVariable Long eventoId) {
         try {
             BigDecimal valorPorPessoa = despesaService.calcularDivisao(eventoId);
@@ -72,5 +81,12 @@ public class DespesaController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping("/evento/{eventoId}")
+    public ResponseEntity<List<Despesa>> listarPorEvento(@PathVariable Long eventoId){
+        List<Despesa> despesas = despesaService.listarPorEvento(eventoId);
+        return ResponseEntity.ok(despesas);
+    }
+    
 
 }

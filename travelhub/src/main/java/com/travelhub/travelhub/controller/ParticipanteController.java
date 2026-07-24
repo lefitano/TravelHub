@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.travelhub.travelhub.dto.AddParticipanteDTO;
 import com.travelhub.travelhub.model.Participante;
+
 
 @RestController
 @RequestMapping("/participantes")
@@ -26,9 +28,13 @@ public class ParticipanteController {
     private ParticipanteService participanteService;
 
     @PostMapping
-    public ResponseEntity<Participante> criar(@RequestBody Participante participante) {
-        Participante salvo = participanteService.salvar(participante);
-        return ResponseEntity.status(201).body(salvo);
+    public ResponseEntity<Participante> criar(@RequestBody AddParticipanteDTO dto) {
+        try {
+            Participante salvo = participanteService.adicionarPorEmail(dto);
+            return ResponseEntity.status(201).body(salvo);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).build();
+        }
     }
 
     @GetMapping
@@ -67,4 +73,11 @@ public class ParticipanteController {
         participanteService.deletar(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/evento/{eventoId}")
+    public ResponseEntity<List<Participante>> listarPorEvento(@PathVariable Long eventoId){
+        List <Participante> participantes = participanteService.listarPorEvento(eventoId);
+        return ResponseEntity.ok(participantes);
+    }
+    
 }

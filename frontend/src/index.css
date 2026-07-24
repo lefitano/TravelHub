@@ -160,6 +160,7 @@ body{
   border-top: 3px solid #ff6b35 !important;
   transition: box-shadow 0.2s ease, transform 0.2s ease !important;
   cursor: pointer;
+  box-shadow: 0 4px 16px rgba(255, 107,53, 0.2) !important;
 }
 
 .card-evento:hover{

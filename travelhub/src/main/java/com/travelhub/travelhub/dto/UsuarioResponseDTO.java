@@ -14,3 +14,4 @@ public class UsuarioResponseDTO {
     private LocalDateTime dataCadastro;
 
 }
+
