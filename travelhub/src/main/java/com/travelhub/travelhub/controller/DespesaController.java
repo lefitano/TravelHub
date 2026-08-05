@@ -2,6 +2,7 @@ package com.travelhub.travelhub.controller;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.travelhub.travelhub.dto.AddDespesaDTO;
 import com.travelhub.travelhub.model.Despesa;
 import com.travelhub.travelhub.service.DespesaService;
-import org.springframework.web.bind.annotation.RequestParam;
+import com.travelhub.travelhub.service.EventoService;
 
 
 @RestController
@@ -26,11 +27,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class DespesaController {
     @Autowired
     private DespesaService despesaService;
+    @Autowired
+    private EventoService eventoService;
 
     @PostMapping
     public ResponseEntity<Despesa> salvar(@RequestBody AddDespesaDTO dto) {
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            if (!eventoService.usuarioParticipa(dto.getEventoId(), email)) {
+                return ResponseEntity.status(403).build();
+            }
             Despesa salva = despesaService.criarDespesa(dto, email);
             return ResponseEntity.status(201).body(salva);
 
@@ -39,21 +45,29 @@ public class DespesaController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<Despesa>> listar() {
-        List<Despesa> despesas = despesaService.listarTodos();
-        return ResponseEntity.ok(despesas);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<Despesa> buscarPorId(@PathVariable Long id) {
-        return despesaService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Despesa> despesaOpt = despesaService.buscarPorId(id);
+        if (despesaOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!eventoService.usuarioParticipa(despesaOpt.get().getEvento().getId(), email)) {
+            return ResponseEntity.status(403).build();
+        }
+        return ResponseEntity.ok(despesaOpt.get());
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Despesa> atualizar(@PathVariable Long id, @RequestBody Despesa despesa) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Despesa> despesaAtualOpt = despesaService.buscarPorId(id);
+        if (despesaAtualOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!eventoService.usuarioParticipa(despesaAtualOpt.get().getEvento().getId(), email)) {
+            return ResponseEntity.status(403).build();
+        }
         try {
             Despesa despesaAtualizada = despesaService.atualizar(id, despesa);
             return ResponseEntity.ok(despesaAtualizada);
@@ -64,6 +78,14 @@ public class DespesaController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Despesa> despesaOpt = despesaService.buscarPorId(id);
+        if (despesaOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!eventoService.usuarioParticipa(despesaOpt.get().getEvento().getId(), email)) {
+            return ResponseEntity.status(403).build();
+        }
         try {
             despesaService.deletar(id);
             return ResponseEntity.noContent().build();
@@ -74,6 +96,10 @@ public class DespesaController {
 
     @GetMapping("/divisao/{eventoId}")
     public ResponseEntity<BigDecimal> calcularDivisao(@PathVariable Long eventoId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!eventoService.usuarioParticipa(eventoId, email)) {
+            return ResponseEntity.status(403).build();
+        }
         try {
             BigDecimal valorPorPessoa = despesaService.calcularDivisao(eventoId);
             return ResponseEntity.ok(valorPorPessoa);
@@ -84,9 +110,12 @@ public class DespesaController {
 
     @GetMapping("/evento/{eventoId}")
     public ResponseEntity<List<Despesa>> listarPorEvento(@PathVariable Long eventoId){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!eventoService.usuarioParticipa(eventoId, email)) {
+            return ResponseEntity.status(403).build();
+        }
         List<Despesa> despesas = despesaService.listarPorEvento(eventoId);
         return ResponseEntity.ok(despesas);
     }
-    
 
 }

@@ -139,7 +139,7 @@ export default function EventosDetailsPage(){
                 </div>
             )}
 
-            {/* seção participantes */}
+            
             <div style={{ marginBottom: "2rem" }}>
                 <h5 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, marginBottom: "1rem" }}>
                     Participantes

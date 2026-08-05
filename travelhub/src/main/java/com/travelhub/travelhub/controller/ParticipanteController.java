@@ -1,5 +1,6 @@
 package com.travelhub.travelhub.controller;
 
+import com.travelhub.travelhub.service.EventoService;
 import com.travelhub.travelhub.service.ParticipanteService;
 
 import java.util.List;
@@ -26,9 +27,15 @@ import com.travelhub.travelhub.model.Participante;
 public class ParticipanteController {
     @Autowired
     private ParticipanteService participanteService;
+    @Autowired
+    private EventoService eventoService;
 
     @PostMapping
     public ResponseEntity<Participante> criar(@RequestBody AddParticipanteDTO dto) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!eventoService.usuarioParticipa(dto.getEventoId(), email)) {
+            return ResponseEntity.status(403).build();
+        }
         try {
             Participante salvo = participanteService.adicionarPorEmail(dto);
             return ResponseEntity.status(201).body(salvo);
@@ -37,21 +44,29 @@ public class ParticipanteController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<Participante>> listarTodos() {
-        List<Participante> participantes = participanteService.listarTodos();
-        return ResponseEntity.ok(participantes);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<Participante> buscarPorId(@PathVariable Long id) {
-        return participanteService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Participante> participanteOpt = participanteService.buscarPorId(id);
+        if (participanteOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!eventoService.usuarioParticipa(participanteOpt.get().getEvento().getId(), email)) {
+            return ResponseEntity.status(403).build();
+        }
+        return ResponseEntity.ok(participanteOpt.get());
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Participante> atualizar(@PathVariable Long id, @RequestBody Participante participante) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Participante> participanteAtualOpt = participanteService.buscarPorId(id);
+        if (participanteAtualOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!eventoService.usuarioParticipa(participanteAtualOpt.get().getEvento().getId(), email)) {
+            return ResponseEntity.status(403).build();
+        }
         try {
             Participante participanteAtualizado = participanteService.atualizar(id, participante);
             return ResponseEntity.ok(participanteAtualizado);
@@ -63,11 +78,16 @@ public class ParticipanteController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<Participante> participante = participanteService.buscarPorId(id);
-        if(participante.isEmpty()){
+        Optional<Participante> participanteOpt = participanteService.buscarPorId(id);
+        if(participanteOpt.isEmpty()){
             return ResponseEntity.notFound().build();
         }
-        if(!participante.get().getUsuario().getEmail().equals(email)){
+        Participante participante = participanteOpt.get();
+        boolean ehOProprio = participante.getUsuario().getEmail().equals(email);
+        boolean ehCriadorDoEvento = participante.getEvento().getCriador() != null
+                && participante.getEvento().getCriador().getEmail().equals(email);
+       
+        if(!ehOProprio && !ehCriadorDoEvento){
             return ResponseEntity.status(403).build();
         }
         participanteService.deletar(id);
@@ -76,8 +96,12 @@ public class ParticipanteController {
 
     @GetMapping("/evento/{eventoId}")
     public ResponseEntity<List<Participante>> listarPorEvento(@PathVariable Long eventoId){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!eventoService.usuarioParticipa(eventoId, email)) {
+            return ResponseEntity.status(403).build();
+        }
         List <Participante> participantes = participanteService.listarPorEvento(eventoId);
         return ResponseEntity.ok(participantes);
     }
-    
+
 }

@@ -3,6 +3,8 @@ package com.travelhub.travelhub.controller;
 
 
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -40,11 +42,16 @@ public class UsuarioController {
     }
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> buscarPorId(@PathVariable Long id){
-        return usuarioService.buscarPorId(id)
-        .map(u -> ResponseEntity.ok(
-            new UsuarioResponseDTO(u.getId(), u.getNome(), u.getEmail(), u.getDataCadastro())
-        ))
-        .orElse(ResponseEntity.notFound().build());
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(id);
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!usuarioOpt.get().getEmail().equals(email)) {
+            return ResponseEntity.status(403).build();
+        }
+        Usuario u = usuarioOpt.get();
+        return ResponseEntity.ok(new UsuarioResponseDTO(u.getId(), u.getNome(), u.getEmail(), u.getDataCadastro()));
     }
 
     @GetMapping("/me")
@@ -59,6 +66,14 @@ public class UsuarioController {
 
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> atualizar(@PathVariable Long id, @RequestBody Usuario usuario){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(id);
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!usuarioOpt.get().getEmail().equals(email)) {
+            return ResponseEntity.status(403).build();
+        }
         try{
             Usuario atualizado = usuarioService.atualizar(id, usuario);
             UsuarioResponseDTO dto = new UsuarioResponseDTO(atualizado.getId(), atualizado.getNome(), atualizado.getEmail(), atualizado.getDataCadastro());
@@ -71,6 +86,14 @@ public class UsuarioController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(id);
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!usuarioOpt.get().getEmail().equals(email)) {
+            return ResponseEntity.status(403).build();
+        }
         try{
             usuarioService.deletar(id);
             return ResponseEntity.noContent().build();

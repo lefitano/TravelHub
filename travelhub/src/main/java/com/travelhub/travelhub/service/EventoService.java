@@ -13,6 +13,7 @@ import com.travelhub.travelhub.repository.UsuarioRepository;
 import com.travelhub.travelhub.model.Evento;
 import com.travelhub.travelhub.model.Participante;
 import com.travelhub.travelhub.model.StatusPagamento;
+import com.travelhub.travelhub.model.Usuario;
 
 @Service
 
@@ -26,17 +27,19 @@ public class EventoService {
 
 
     public Evento salvar(Evento evento, String emailCriador) {
+      Usuario criador = usuarioRepository.findByEmail(emailCriador)
+        .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+      evento.setCriador(criador);
       Evento eventoSalvo = eventoRepository.save(evento);
 
-      usuarioRepository.findByEmail(emailCriador).ifPresent(usuario ->{
-        Participante participante = new Participante();
-        participante.setEvento(eventoSalvo);
-        participante.setUsuario(usuario);
-        participante.setStatusPagamento(StatusPagamento.PENDENTE);
-        participanteRepository.save(participante);
-      } );
-      return eventoSalvo;
+      Participante participante = new Participante();
+      participante.setEvento(eventoSalvo);
+      participante.setUsuario(criador);
+      participante.setStatusPagamento(StatusPagamento.PENDENTE);
+      participanteRepository.save(participante);
 
+      return eventoSalvo;
     }
 
     public Optional<Evento> buscarPorId(Long id) {

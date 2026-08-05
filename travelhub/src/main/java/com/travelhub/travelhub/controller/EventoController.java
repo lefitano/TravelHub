@@ -38,6 +38,10 @@ public class EventoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Evento> buscarPorId(@PathVariable Long id) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!eventoService.usuarioParticipa(id, email)) {
+            return ResponseEntity.status(403).build();
+        }
         return eventoService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
