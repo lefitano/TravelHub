@@ -56,7 +56,12 @@ export default function EventosPage() {
       const resposta = await api.get("/eventos/meus");
       setEventos(resposta.data);
     } catch (error) {
-      setErroForm("Erro ao criar evento. Verifique os dados");
+        if(error.response?.status === 400 && typeof error.response.data === "object"){
+          const mensagens = Object.values(error.response.data).join(" ");
+          setErroForm(mensagens);
+        }else{
+          setErroForm("Erro ao criar evento. Verifique os dados");
+        }
     }
   }
 

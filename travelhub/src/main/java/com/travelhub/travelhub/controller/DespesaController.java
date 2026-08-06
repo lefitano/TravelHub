@@ -21,6 +21,8 @@ import com.travelhub.travelhub.model.Despesa;
 import com.travelhub.travelhub.service.DespesaService;
 import com.travelhub.travelhub.service.EventoService;
 
+import jakarta.validation.Valid;
+
 
 @RestController
 @RequestMapping("/despesas")
@@ -31,7 +33,7 @@ public class DespesaController {
     private EventoService eventoService;
 
     @PostMapping
-    public ResponseEntity<Despesa> salvar(@RequestBody AddDespesaDTO dto) {
+    public ResponseEntity<Despesa> salvar(@Valid @RequestBody AddDespesaDTO dto) {
         try {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
             if (!eventoService.usuarioParticipa(dto.getEventoId(), email)) {

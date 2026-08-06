@@ -21,6 +21,8 @@ import com.travelhub.travelhub.dto.UsuarioResponseDTO;
 import com.travelhub.travelhub.model.Usuario;
 import com.travelhub.travelhub.service.UsuarioService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 
 
@@ -31,7 +33,7 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @PostMapping
-    public ResponseEntity<UsuarioResponseDTO> criar(@RequestBody Usuario usuario){
+    public ResponseEntity<UsuarioResponseDTO> criar( @Valid @RequestBody Usuario usuario){
         try{
         Usuario salvo = usuarioService.salvar(usuario);
         UsuarioResponseDTO dto = new UsuarioResponseDTO(salvo.getId(), salvo.getNome(), salvo.getEmail(), salvo.getDataCadastro());
@@ -65,7 +67,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioResponseDTO> atualizar(@PathVariable Long id, @RequestBody Usuario usuario){
+    public ResponseEntity<UsuarioResponseDTO> atualizar(@PathVariable Long id, @Valid @RequestBody Usuario usuario){
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(id);
         if (usuarioOpt.isEmpty()) {

@@ -14,6 +14,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Data
@@ -26,16 +28,20 @@ public class Evento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
+    @NotBlank(message = "O nome do evento é obrigatório")
     private String nome;
     @Column(nullable = false)
+    @NotBlank(message = "A descrição do evento é obrigatória")
     private String descricao;
     @Column(nullable = false)
+    @NotBlank(message = "O destino do evento é obrigatório")
     private String destino;
     @Column(nullable = false)
+    @NotNull(message = "A data de início do evento é obrigatária")
     private LocalDate dataInicio;
     @Column(nullable = false)
+    @NotNull(message = "A data final do evento é obrigatória")
     private LocalDate dataFim;
-    // nullable: eventos criados antes dessa coluna existir ficam sem criador
     @ManyToOne
     @JoinColumn(name = "criador_id")
     private Usuario criador;

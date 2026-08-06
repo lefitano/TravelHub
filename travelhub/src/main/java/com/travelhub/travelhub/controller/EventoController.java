@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.travelhub.travelhub.service.EventoService;
+
+import jakarta.validation.Valid;
+
 import com.travelhub.travelhub.model.Evento;
 
 @RestController
@@ -23,7 +26,7 @@ public class EventoController {
     private EventoService eventoService;
 
     @PostMapping
-    public ResponseEntity<Evento> salvar(@RequestBody Evento evento) {
+    public ResponseEntity<Evento> salvar(@Valid @RequestBody Evento evento) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Evento eventoSalvo = eventoService.salvar(evento, email);
         return ResponseEntity.status(201).body(eventoSalvo);
@@ -48,7 +51,7 @@ public class EventoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Evento> atualizar(@PathVariable Long id, @RequestBody Evento evento) {
+    public ResponseEntity<Evento> atualizar(@PathVariable Long id, @Valid @RequestBody Evento evento) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         if (!eventoService.usuarioParticipa(id, email)) {
             return ResponseEntity.status(403).build();

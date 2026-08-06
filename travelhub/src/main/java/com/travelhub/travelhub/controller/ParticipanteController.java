@@ -3,6 +3,8 @@ package com.travelhub.travelhub.controller;
 import com.travelhub.travelhub.service.EventoService;
 import com.travelhub.travelhub.service.ParticipanteService;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -31,7 +33,7 @@ public class ParticipanteController {
     private EventoService eventoService;
 
     @PostMapping
-    public ResponseEntity<Participante> criar(@RequestBody AddParticipanteDTO dto) {
+    public ResponseEntity<Participante> criar(@Valid @RequestBody AddParticipanteDTO dto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         if (!eventoService.usuarioParticipa(dto.getEventoId(), email)) {
             return ResponseEntity.status(403).build();
