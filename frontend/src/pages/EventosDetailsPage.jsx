@@ -18,6 +18,9 @@ export default function EventosDetailsPage(){
     const[erro, setErro] = useState('')
     const [emailConvidar, setEmailConvidar] = useState('')
     const [erroParticipante, setErroParticipante] = useState('')
+    const [descricaoDespesa, setDescricaoDespesa] = useState('')
+    const [valorDespesa, setValorDespesa] = useState('')
+    const [erroDespesa, setErroDespesa] = useState('')
 
     const diasRestantes = evento
         ? Math.ceil((new Date(evento.dataInicio) - new Date()) / (1000 * 60 * 60 * 24))
@@ -27,15 +30,17 @@ export default function EventosDetailsPage(){
     useEffect(() => {
         async function carregarDados(){
             try{
-                const[resEvento, resParticipantes, resDespesas] = await Promise.all([
+                const[resEvento, resParticipantes, resDespesas, resDivisao] = await Promise.all([
                     api.get(`/eventos/${id}`),
                     api.get(`/participantes/evento/${id}`),
-                    api.get(`/despesas/evento/${id}`)
+                    api.get(`/despesas/evento/${id}`),
+                    api.get(`/despesas/divisao/${id}`)
                 ])
               setEvento(resEvento.data)
               setParticipantes(resParticipantes.data)
               setDespesas(resDespesas.data)
-            } catch(e){
+              setDivisaoPorPessoa(resDivisao.data)
+            } catch{
                 setErro("Não foi possível carregar os dados do evento")
             }
         }
@@ -50,7 +55,7 @@ export default function EventosDetailsPage(){
             setEmailConvidar('')
             const res = await api.get(`/participantes/evento/${id}`)
             setParticipantes(res.data)
-        }catch(erro){
+        }catch{
             setErroParticipante("Usuário não encontrado ou já participando")
         }
     }
@@ -58,8 +63,34 @@ export default function EventosDetailsPage(){
         try{
             await api.delete(`/participantes/${participanteId}`)
             setParticipantes(prev => prev.filter(p => p.id !== participanteId))
-        }catch(erro){
+        }catch{
             setErroParticipante("Não foi possível remover o participante")
+        }
+    }
+    async function handleAdicionarDespesa(e){
+        e.preventDefault()
+        setErroDespesa('')
+        try{
+            await api.post('/despesas', {descricao: descricaoDespesa , valor: Number(valorDespesa), eventoId: Number(id)})
+            setDescricaoDespesa('')
+            setValorDespesa('')
+            const res = await api.get(`/despesas/evento/${id}`)
+            setDespesas(res.data)
+            const resDivisao = await api.get(`/despesas/divisao/${id}`)
+            setDivisaoPorPessoa(resDivisao.data)
+        }catch{
+            setErroDespesa('Não foi possível adicionar despesa')
+        }
+    }
+
+    async function handleRemoverDespesa(despesaId){
+        try{
+            await api.delete(`/despesas/${despesaId}`)
+            setDespesas(prev => prev.filter(p => p.id !== despesaId))
+            const resDivisao = await api.get(`/despesas/divisao/${id}`)
+            setDivisaoPorPessoa(resDivisao.data)
+        }catch{
+            setErroDespesa("Não foi possível remover a despesa")
         }
     }
 
@@ -180,7 +211,65 @@ export default function EventosDetailsPage(){
                     <p style={{ color: "red", fontSize: "0.85rem", marginTop: "0.5rem" }}>{erroParticipante}</p>
                 )}
             </div>
+            <div style={{ marginBottom: "2rem" }}>
+                <h5 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, marginBottom: "1rem" }}>
+                Despesas
+                </h5>
+
+                {despesas.map(d => (
+                    <div key={d.id} style={{ display: "flex", justifyContent: "space-between",
+                        alignItems: "center", padding: "0.75rem 1rem", marginBottom: "0.5rem",
+                        backgroundColor: "#ffffff", border: "1px solid #e5e7eb",
+                        borderRadius: "8px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
+                        <div>
+                            <p style={{ margin: 0, fontWeight: 600, fontSize: "0.95rem" }}>{d.descricao}</p>
+                            <p style={{ margin: 0, color: "#6b7280", fontSize: "0.8rem" }}>
+                                {d.responsavel.nome} · R$ {Number(d.valor).toFixed(2)}
+                            </p>
+                        </div>
+                        <button onClick={() => handleRemoverDespesa(d.id)}
+                            style={{ background: "none", border: "none", color: "#6b7280",
+                                cursor: "pointer", fontSize: "1.1rem", lineHeight: 1 }}>
+                            ×
+                        </button>
+                    </div>
+                ))}
+
+                <form onSubmit={handleAdicionarDespesa}
+                    style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
+                    <input
+                        type="text"
+                        placeholder="Descrição"
+                        value={descricaoDespesa}
+                        onChange={e => setDescricaoDespesa(e.target.value)}
+                        required
+                        style={{ flex: 1, padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
+                            borderRadius: "8px", fontSize: "0.9rem", outline: "none" }}
+                    />
+                    <input
+                        type="number"
+                        step="0.01"
+                        placeholder="Valor"
+                        value={valorDespesa}
+                        onChange={e => setValorDespesa(e.target.value)}
+                        required
+                        style={{ width: "120px", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
+                            borderRadius: "8px", fontSize: "0.9rem", outline: "none" }}
+                    />
+                    <Button className="btn-laranja" type="submit">Adicionar</Button>
+                </form>
+
+                {erroDespesa && (
+                    <p style={{ color: "red", fontSize: "0.85rem", marginTop: "0.5rem" }}>{erroDespesa}</p>
+                )}
+
+                <p style={{ color: "#6b7280", fontSize: "0.85rem", marginTop: "0.75rem" }}>
+                    Total: R$ {totalDespesas.toFixed(2)} · Por pessoa: R$ {divisaoPorPessoa !== null ? Number(divisaoPorPessoa).toFixed(2) : "—"}
+                </p>
+            </div>
+
         </Container>
+       
         </>
     )
 }
