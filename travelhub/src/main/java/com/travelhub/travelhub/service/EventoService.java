@@ -1,5 +1,6 @@
 package com.travelhub.travelhub.service;
 
+import com.travelhub.travelhub.repository.DespesaRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -10,6 +11,9 @@ import org.springframework.stereotype.Service;
 import com.travelhub.travelhub.repository.EventoRepository;
 import com.travelhub.travelhub.repository.ParticipanteRepository;
 import com.travelhub.travelhub.repository.UsuarioRepository;
+
+import org.springframework.transaction.annotation.Transactional;
+
 import com.travelhub.travelhub.model.Evento;
 import com.travelhub.travelhub.model.Participante;
 import com.travelhub.travelhub.model.StatusPagamento;
@@ -18,12 +22,18 @@ import com.travelhub.travelhub.model.Usuario;
 @Service
 
 public class EventoService {
+    private final DespesaRepository despesaRepository;
     @Autowired
     private EventoRepository eventoRepository;
     @Autowired
     private ParticipanteRepository participanteRepository;
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+
+    EventoService(DespesaRepository despesaRepository) {
+        this.despesaRepository = despesaRepository;
+    }
 
 
     public Evento salvar(Evento evento, String emailCriador) {
@@ -59,12 +69,12 @@ public class EventoService {
                 })
                 .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
     }
-
+@Transactional
     public void deletar(Long id) {
-        participanteRepository.deleteAll(
-            participanteRepository.findByEventoId(id)
-        );
+        despesaRepository.deleteAll(despesaRepository.findByEventoId(id));
+        participanteRepository.deleteAll(participanteRepository.findByEventoId(id));
         eventoRepository.deleteById(id);
+
     }
 
     public List<Evento> listarPorUsuario(String email){

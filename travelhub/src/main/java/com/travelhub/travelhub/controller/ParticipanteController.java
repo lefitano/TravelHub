@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
+import javax.print.DocFlavor.READER;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -88,10 +90,16 @@ public class ParticipanteController {
         boolean ehOProprio = participante.getUsuario().getEmail().equals(email);
         boolean ehCriadorDoEvento = participante.getEvento().getCriador() != null
                 && participante.getEvento().getCriador().getEmail().equals(email);
+        boolean participanteEhCriador = participante.getEvento().getCriador() != null
+                && participante.getUsuario().getEmail().equals(participante.getEvento().getCriador().getEmail());
        
         if(!ehOProprio && !ehCriadorDoEvento){
             return ResponseEntity.status(403).build();
         }
+        if(participanteEhCriador){
+            return ResponseEntity.status(409).build();
+        }
+        
         participanteService.deletar(id);
         return ResponseEntity.noContent().build();
     }
