@@ -85,7 +85,11 @@ public class DespesaController {
         if (despesaOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        if (!eventoService.usuarioParticipa(despesaOpt.get().getEvento().getId(), email)) {
+        Despesa despesa = despesaOpt.get();
+        boolean ehResponsavel = despesa.getResponsavel().getEmail().equals(email);
+        boolean ehCriadorDoEvento = despesa.getEvento().getCriador() != null 
+                && despesa.getEvento().getCriador().getEmail().equals(email);
+        if(!ehResponsavel && !ehCriadorDoEvento){
             return ResponseEntity.status(403).build();
         }
         try {
@@ -94,6 +98,7 @@ public class DespesaController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+        
     }
 
     @GetMapping("/divisao/{eventoId}")

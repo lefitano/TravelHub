@@ -21,6 +21,7 @@ export default function EventosDetailsPage(){
     const [descricaoDespesa, setDescricaoDespesa] = useState('')
     const [valorDespesa, setValorDespesa] = useState('')
     const [erroDespesa, setErroDespesa] = useState('')
+    const [usuarioLogado, setUsuarioLogado] = useState(null)
 
     const diasRestantes = evento
         ? Math.ceil((new Date(evento.dataInicio) - new Date()) / (1000 * 60 * 60 * 24))
@@ -30,16 +31,18 @@ export default function EventosDetailsPage(){
     useEffect(() => {
         async function carregarDados(){
             try{
-                const[resEvento, resParticipantes, resDespesas, resDivisao] = await Promise.all([
+                const[resEvento, resParticipantes, resDespesas, resDivisao,resUsuario] = await Promise.all([
                     api.get(`/eventos/${id}`),
                     api.get(`/participantes/evento/${id}`),
                     api.get(`/despesas/evento/${id}`),
-                    api.get(`/despesas/divisao/${id}`)
+                    api.get(`/despesas/divisao/${id}`),
+                    api.get(`/usuarios/me`)
                 ])
               setEvento(resEvento.data)
               setParticipantes(resParticipantes.data)
               setDespesas(resDespesas.data)
               setDivisaoPorPessoa(resDivisao.data)
+              setUsuarioLogado(resUsuario.data)
             } catch{
                 setErro("Não foi possível carregar os dados do evento")
             }
@@ -227,11 +230,13 @@ export default function EventosDetailsPage(){
                                 {d.responsavel.nome} · R$ {Number(d.valor).toFixed(2)}
                             </p>
                         </div>
-                        <button onClick={() => handleRemoverDespesa(d.id)}
-                            style={{ background: "none", border: "none", color: "#6b7280",
-                                cursor: "pointer", fontSize: "1.1rem", lineHeight: 1 }}>
-                            ×
-                        </button>
+                        {(d.responsavel.email === usuarioLogado?.email || evento?.criador?.email === usuarioLogado?.email) && (
+                            <button onClick={() => handleRemoverDespesa(d.id)}
+                                style={{ background: "none", border: "none", color: "#6b7280",
+                                    cursor: "pointer", fontSize: "1.1rem", lineHeight: 1 }}>
+                                ×
+                            </button>
+)}
                     </div>
                 ))}
 
