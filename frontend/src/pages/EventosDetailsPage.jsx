@@ -188,11 +188,13 @@ export default function EventosDetailsPage(){
                             <p style={{ margin: 0, fontWeight: 600, fontSize: "0.95rem" }}>{p.usuario.nome}</p>
                             <p style={{ margin: 0, color: "#6b7280", fontSize: "0.8rem" }}>{p.usuario.email}</p>
                         </div>
+                        {(p.usuario.email === usuarioLogado?.email || evento?.criador?.email === usuarioLogado?.email) && (
                         <button onClick={() => handleRemoverParticipante(p.id)}
                             style={{ background: "none", border: "none", color: "#6b7280",
                                 cursor: "pointer", fontSize: "1.1rem", lineHeight: 1 }}>
                             ×
                         </button>
+                        )}
                     </div>
                 ))}
 

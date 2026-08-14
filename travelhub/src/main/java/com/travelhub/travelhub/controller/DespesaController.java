@@ -1,6 +1,5 @@
 package com.travelhub.travelhub.controller;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +19,7 @@ import com.travelhub.travelhub.dto.AddDespesaDTO;
 import com.travelhub.travelhub.model.Despesa;
 import com.travelhub.travelhub.service.DespesaService;
 import com.travelhub.travelhub.service.EventoService;
+import com.travelhub.travelhub.dto.SaldoParticipanteDTO;
 
 import jakarta.validation.Valid;
 
@@ -86,7 +86,7 @@ public class DespesaController {
             return ResponseEntity.notFound().build();
         }
         Despesa despesa = despesaOpt.get();
-        boolean ehResponsavel = despesa.getResponsavel().getEmail().equals(email);
+        boolean ehResponsavel = despesa.getResponsavel().getEmail().equals(email); 
         boolean ehCriadorDoEvento = despesa.getEvento().getCriador() != null 
                 && despesa.getEvento().getCriador().getEmail().equals(email);
         if(!ehResponsavel && !ehCriadorDoEvento){
@@ -102,14 +102,14 @@ public class DespesaController {
     }
 
     @GetMapping("/divisao/{eventoId}")
-    public ResponseEntity<BigDecimal> calcularDivisao(@PathVariable Long eventoId) {
+    public ResponseEntity<List<SaldoParticipanteDTO>> calcularDivisao(@PathVariable Long eventoId) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         if (!eventoService.usuarioParticipa(eventoId, email)) {
             return ResponseEntity.status(403).build();
         }
         try {
-            BigDecimal valorPorPessoa = despesaService.calcularDivisao(eventoId);
-            return ResponseEntity.ok(valorPorPessoa);
+            List<SaldoParticipanteDTO> saldos = despesaService.calcularDivisao(eventoId);
+            return ResponseEntity.ok(saldos);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }

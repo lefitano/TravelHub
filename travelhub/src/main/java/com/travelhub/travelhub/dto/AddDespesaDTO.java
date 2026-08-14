@@ -1,6 +1,7 @@
 package com.travelhub.travelhub.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,4 +21,5 @@ public class AddDespesaDTO {
     private BigDecimal valor;
     @NotNull(message = "Evento necessário")
     private Long eventoId;
+    private List<Long> participantesIds;
 }

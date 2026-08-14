@@ -1,7 +1,8 @@
 package com.travelhub.travelhub.model;
 
 import java.math.BigDecimal;
-
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,6 +10,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -36,5 +39,13 @@ public class Despesa {
     @ManyToOne
     @JoinColumn(name = "evento_id", nullable = false)
     private Evento evento;
+    @ManyToMany
+    @JoinTable(
+        name = "despesa_participantes",
+        joinColumns = @JoinColumn(name = "despesa_id"),
+        inverseJoinColumns  = @JoinColumn(name = "participante_id")
+    )
+    private List<Participante> participantes = new ArrayList<>();
+    
 
 }
