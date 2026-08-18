@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 
@@ -22,6 +23,8 @@ import com.travelhub.travelhub.model.Usuario;
 import com.travelhub.travelhub.model.Evento;
 import com.travelhub.travelhub.model.Participante;
 import com.travelhub.travelhub.dto.SaldoParticipanteDTO;
+import com.travelhub.travelhub.dto.DespesaDetalheDTO;
+import com.travelhub.travelhub.dto.ResumoDespesasDTO;
 @Service
 
 public class DespesaService {
@@ -127,8 +130,57 @@ public class DespesaService {
         }
         despesa.setParticipantes(participantes);
         return despesaRepository.save(despesa);
-       
-       
+
+
+    }
+
+    public ResumoDespesasDTO gerarResumo(Long eventoId, String email) {
+        Evento evento = eventoRepository.findById(eventoId)
+            .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
+
+        List<Participante> todosParticipantes = participanteRepository.findByEventoId(eventoId);
+        Participante participanteAtual = todosParticipantes.stream()
+            .filter(p -> p.getUsuario().getEmail().equals(email))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("Usuário não participa desse evento"));
+
+        boolean ehCriador = evento.getCriador() != null && evento.getCriador().getEmail().equals(email);
+
+        List<Despesa> despesas = despesaRepository.findByEventoId(eventoId);
+        List<DespesaDetalheDTO> detalhes = new ArrayList<>();
+        BigDecimal totalQueDevo = BigDecimal.ZERO;
+
+        for (Despesa d : despesas) {
+            List<Participante> participantesDaDespesa = d.getParticipantes().isEmpty()
+                ? todosParticipantes
+                : d.getParticipantes();
+
+            boolean euParticipoDessa = participantesDaDespesa.stream()
+                .anyMatch(p -> p.getId().equals(participanteAtual.getId()));
+
+            if (!ehCriador && !euParticipoDessa) {
+                continue;
+            }
+
+            BigDecimal valorPorPessoa = d.getValor().divide(
+                new BigDecimal(participantesDaDespesa.size()), 2, RoundingMode.HALF_UP
+            );
+
+            BigDecimal minhaParte = euParticipoDessa ? valorPorPessoa : BigDecimal.ZERO;
+            if (euParticipoDessa) {
+                totalQueDevo = totalQueDevo.add(valorPorPessoa);
+            }
+
+            List<String> nomes = participantesDaDespesa.stream()
+                .map(p -> p.getUsuario().getNome())
+                .collect(Collectors.toList());
+
+            detalhes.add(new DespesaDetalheDTO(
+                d.getId(), d.getDescricao(), d.getValor(), d.getResponsavel().getNome(), minhaParte, nomes
+            ));
+        }
+
+        return new ResumoDespesasDTO(ehCriador, totalQueDevo, detalhes);
     }
 
 }

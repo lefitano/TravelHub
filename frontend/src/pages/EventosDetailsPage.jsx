@@ -22,6 +22,7 @@ export default function EventosDetailsPage(){
     const [valorDespesa, setValorDespesa] = useState('')
     const [erroDespesa, setErroDespesa] = useState('')
     const [usuarioLogado, setUsuarioLogado] = useState(null)
+    const [participantesSelecionados, setParticipantesSelecionados] = useState([])
 
     const diasRestantes = evento
         ? Math.ceil((new Date(evento.dataInicio) - new Date()) / (1000 * 60 * 60 * 24))
@@ -40,6 +41,7 @@ export default function EventosDetailsPage(){
                 ])
               setEvento(resEvento.data)
               setParticipantes(resParticipantes.data)
+              setParticipantesSelecionados(resParticipantes.data.map(p => p.id))
               setDespesas(resDespesas.data)
               setDivisaoPorPessoa(resDivisao.data)
               setUsuarioLogado(resUsuario.data)
@@ -58,6 +60,7 @@ export default function EventosDetailsPage(){
             setEmailConvidar('')
             const res = await api.get(`/participantes/evento/${id}`)
             setParticipantes(res.data)
+            setParticipantesSelecionados(res.data.map(p => p.id))
         }catch{
             setErroParticipante("Usuário não encontrado ou já participando")
         }
@@ -66,17 +69,32 @@ export default function EventosDetailsPage(){
         try{
             await api.delete(`/participantes/${participanteId}`)
             setParticipantes(prev => prev.filter(p => p.id !== participanteId))
+            setParticipantesSelecionados(prev => prev.filter(pid => pid !== participanteId))
         }catch{
             setErroParticipante("Não foi possível remover o participante")
         }
     }
+    function handleToggleParticipanteDespesa(participanteId){
+        setParticipantesSelecionados(prev =>
+            prev.includes(participanteId)
+                ? prev.filter(pid => pid !== participanteId)
+                : [...prev, participanteId]
+        )
+    }
+
     async function handleAdicionarDespesa(e){
         e.preventDefault()
         setErroDespesa('')
         try{
-            await api.post('/despesas', {descricao: descricaoDespesa , valor: Number(valorDespesa), eventoId: Number(id)})
+            await api.post('/despesas', {
+                descricao: descricaoDespesa,
+                valor: Number(valorDespesa),
+                eventoId: Number(id),
+                participantesIds: participantesSelecionados
+            })
             setDescricaoDespesa('')
             setValorDespesa('')
+            setParticipantesSelecionados(participantes.map(p => p.id))
             const res = await api.get(`/despesas/evento/${id}`)
             setDespesas(res.data)
             const resDivisao = await api.get(`/despesas/divisao/${id}`)
@@ -156,9 +174,11 @@ export default function EventosDetailsPage(){
                         <p style={{ margin: "0.4rem 0 0", color: "#6b7280", fontSize: "0.72rem",
                             textTransform: "uppercase", letterSpacing: "0.08em" }}>Participantes</p>
                     </div>
-                    <div style={{ flex: 1, backgroundColor: "#ffffff", borderRadius: "12px",
+                    <div onClick={() => navigate(`/eventos/${id}/despesas`)}
+                        style={{ flex: 1, backgroundColor: "#ffffff", borderRadius: "12px",
                         padding: "1.25rem 1.5rem", border: "1px solid #e5e7eb",
-                        borderTop: "3px solid #ff6b35", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+                        borderTop: "3px solid #ff6b35", boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                        cursor: "pointer" }}>
                         <BsWallet2 size={18} style={{ color: "#ff6b35", marginBottom: "0.5rem" }} />
                         <p style={{ margin: 0, fontSize: "2rem", fontWeight: 800, lineHeight: 1,
                             fontFamily: "Raleway, sans-serif",
@@ -266,13 +286,36 @@ export default function EventosDetailsPage(){
                     <Button className="btn-laranja" type="submit">Adicionar</Button>
                 </form>
 
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "0.75rem" }}>
+                    {participantes.map(p => (
+                        <label key={p.id} style={{ display: "flex", alignItems: "center", gap: "0.35rem",
+                            fontSize: "0.85rem", color: "#6b7280", cursor: "pointer" }}>
+                            <input
+                                type="checkbox"
+                                checked={participantesSelecionados.includes(p.id)}
+                                onChange={() => handleToggleParticipanteDespesa(p.id)}
+                            />
+                            {p.usuario.nome}
+                        </label>
+                    ))}
+                </div>
+
                 {erroDespesa && (
                     <p style={{ color: "red", fontSize: "0.85rem", marginTop: "0.5rem" }}>{erroDespesa}</p>
                 )}
 
                 <p style={{ color: "#6b7280", fontSize: "0.85rem", marginTop: "0.75rem" }}>
-                    Total: R$ {totalDespesas.toFixed(2)} · Por pessoa: R$ {divisaoPorPessoa !== null ? Number(divisaoPorPessoa).toFixed(2) : "—"}
+                    Total: R$ {totalDespesas.toFixed(2)}
                 </p>
+                {divisaoPorPessoa && divisaoPorPessoa.length > 0 && (
+                    <ul style={{ margin: "0.25rem 0 0", paddingLeft: "1.1rem", color: "#6b7280", fontSize: "0.85rem" }}>
+                        {divisaoPorPessoa.map(saldo => (
+                            <li key={saldo.participanteId}>
+                                {saldo.nome} deve R$ {Number(saldo.valor).toFixed(2)}
+                            </li>
+                        ))}
+                    </ul>
+                )}
             </div>
 
         </Container>

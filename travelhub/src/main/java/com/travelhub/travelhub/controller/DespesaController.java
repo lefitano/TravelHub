@@ -20,6 +20,7 @@ import com.travelhub.travelhub.model.Despesa;
 import com.travelhub.travelhub.service.DespesaService;
 import com.travelhub.travelhub.service.EventoService;
 import com.travelhub.travelhub.dto.SaldoParticipanteDTO;
+import com.travelhub.travelhub.dto.ResumoDespesasDTO;
 
 import jakarta.validation.Valid;
 
@@ -110,6 +111,20 @@ public class DespesaController {
         try {
             List<SaldoParticipanteDTO> saldos = despesaService.calcularDivisao(eventoId);
             return ResponseEntity.ok(saldos);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/resumo/{eventoId}")
+    public ResponseEntity<ResumoDespesasDTO> resumo(@PathVariable Long eventoId) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!eventoService.usuarioParticipa(eventoId, email)) {
+            return ResponseEntity.status(403).build();
+        }
+        try {
+            ResumoDespesasDTO resumo = despesaService.gerarResumo(eventoId, email);
+            return ResponseEntity.ok(resumo);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
         }

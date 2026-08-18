@@ -7,6 +7,7 @@ import AuthPage from './pages/AuthPage'
 import DashBoardPage from './pages/DashboardPage'
 import EventosPage from './pages/EventosPage'
 import EventosDetailsPage from './pages/EventosDetailsPage'
+import DespesasResumoPage from './pages/DespesasResumoPage'
 import PerfilPage from './pages/PerfilPage'
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
     <Route path="/dashboard" element={<ProtectedRoute><DashBoardPage /></ProtectedRoute>}/>
     <Route path="/eventos" element={<ProtectedRoute><EventosPage /></ProtectedRoute>} />
     <Route path="/eventos/:id" element={<ProtectedRoute><EventosDetailsPage /></ProtectedRoute>}/>
+    <Route path="/eventos/:id/despesas" element={<ProtectedRoute><DespesasResumoPage /></ProtectedRoute>}/>
     <Route path="/perfil" element={<ProtectedRoute><PerfilPage /></ProtectedRoute>} />
     </Routes>
     </>
