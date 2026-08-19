@@ -29,7 +29,7 @@ export default function EventosPage() {
       const resposta = await api.get("/eventos/meus");
       setEventos(resposta.data);
       }
-      catch(erro){
+      catch{
         setErroCarregamento("Não foi possível carregar os eventos")
       }
     }
@@ -203,6 +203,9 @@ export default function EventosPage() {
                           <Card.Title style={{ fontWeight: 700 }}>
                             {evento.nome}
                           </Card.Title>
+                          <Card.Text style={{ color: "#6b7280", fontSize: "0.78rem", marginBottom: "0.25rem" }}>
+                            Criado por {evento.criador?.nome ?? "desconhecido"}
+                          </Card.Text>
                           <Card.Text style={{ color: "#6b7280", fontSize: "0.9rem" }}>
                             {evento.destino}
                           </Card.Text>

@@ -23,6 +23,13 @@ export default function EventosDetailsPage(){
     const [erroDespesa, setErroDespesa] = useState('')
     const [usuarioLogado, setUsuarioLogado] = useState(null)
     const [participantesSelecionados, setParticipantesSelecionados] = useState([])
+    const [mostrarEditarEvento, setMostrarEditarEvento] = useState(false)
+    const [nomeEdit, setNomeEdit] = useState('')
+    const [descricaoEdit, setDescricaoEdit] = useState('')
+    const [destinoEdit, setDestinoEdit] = useState('')
+    const [dataInicioEdit, setDataInicioEdit] = useState('')
+    const [dataFimEdit, setDataFimEdit] = useState('')
+    const [erroEditarEvento, setErroEditarEvento] = useState('')
 
     const diasRestantes = evento
         ? Math.ceil((new Date(evento.dataInicio) - new Date()) / (1000 * 60 * 60 * 24))
@@ -115,6 +122,46 @@ export default function EventosDetailsPage(){
         }
     }
 
+    function handleAbrirEdicao(){
+        setNomeEdit(evento.nome)
+        setDescricaoEdit(evento.descricao)
+        setDestinoEdit(evento.destino)
+        setDataInicioEdit(evento.dataInicio)
+        setDataFimEdit(evento.dataFim)
+        setErroEditarEvento('')
+        setMostrarEditarEvento(true)
+    }
+
+    async function handleSalvarEdicao(e){
+        e.preventDefault()
+        setErroEditarEvento('')
+        try{
+            const res = await api.put(`/eventos/${id}`, {
+                nome: nomeEdit,
+                descricao: descricaoEdit,
+                destino: destinoEdit,
+                dataInicio: dataInicioEdit,
+                dataFim: dataFimEdit
+            })
+            setEvento(res.data)
+            setMostrarEditarEvento(false)
+        }catch{
+            setErroEditarEvento("Não foi possível salvar as alterações")
+        }
+    }
+
+    async function handleExcluirEvento(){
+        if(!window.confirm("Tem certeza que deseja excluir esse evento? Essa ação não pode ser desfeita.")){
+            return
+        }
+        try{
+            await api.delete(`/eventos/${id}`)
+            navigate('/eventos')
+        }catch{
+            setErro("Não foi possível excluir o evento")
+        }
+    }
+
     return(
         <>
         <NavBar />
@@ -127,17 +174,91 @@ export default function EventosDetailsPage(){
                         display: "flex", alignItems: "center", gap: "0.4rem" }}>
                     <BsArrowLeft /> Meus Eventos
                 </button>
-                {evento && (
-                    <>
-                        <h2 style={{ color: "#ffffff", fontFamily: "Raleway, sans-serif",
-                            fontWeight: 700, margin: 0 }}>
-                            {evento.nome}
-                        </h2>
-                        <p style={{ color: "#6b7280", margin: "0.3rem 0 0", fontSize: "0.9rem" }}>
-                            <BsGeoAlt style={{ marginRight: "0.3rem" }} />
-                            {evento.destino} · {evento.dataInicio.split('-').reverse().join('/')} → {evento.dataFim.split('-').reverse().join('/')}
-                        </p>
-                    </>
+                {evento && !mostrarEditarEvento && (
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div>
+                            <h2 style={{ color: "#ffffff", fontFamily: "Raleway, sans-serif",
+                                fontWeight: 700, margin: 0 }}>
+                                {evento.nome}
+                            </h2>
+                            <p style={{ color: "#6b7280", margin: "0.25rem 0 0", fontSize: "0.8rem" }}>
+                                Criado por {evento.criador?.nome ?? "desconhecido"}
+                            </p>
+                            <p style={{ color: "#6b7280", margin: "0.3rem 0 0", fontSize: "0.9rem" }}>
+                                <BsGeoAlt style={{ marginRight: "0.3rem" }} />
+                                {evento.destino} · {evento.dataInicio.split('-').reverse().join('/')} → {evento.dataFim.split('-').reverse().join('/')}
+                            </p>
+                        </div>
+                        {evento.criador?.email === usuarioLogado?.email && (
+                            <div style={{ display: "flex", gap: "0.5rem" }}>
+                                <Button className="btn-laranja" onClick={handleAbrirEdicao}>Editar</Button>
+                                <Button variant="outline-light" onClick={handleExcluirEvento}>Excluir</Button>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {evento && mostrarEditarEvento && (
+                    <div style={{ backgroundColor: "#ffffff", borderRadius: "12px",
+                        padding: "1.25rem 1.5rem", maxWidth: "480px" }}>
+                        <form onSubmit={handleSalvarEdicao}>
+                            <input
+                                type="text"
+                                placeholder="Nome do evento"
+                                value={nomeEdit}
+                                onChange={e => setNomeEdit(e.target.value)}
+                                required
+                                style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
+                                    borderRadius: "8px", fontSize: "0.9rem", outline: "none", marginBottom: "0.5rem" }}
+                            />
+                            <input
+                                type="text"
+                                placeholder="Descrição"
+                                value={descricaoEdit}
+                                onChange={e => setDescricaoEdit(e.target.value)}
+                                required
+                                style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
+                                    borderRadius: "8px", fontSize: "0.9rem", outline: "none", marginBottom: "0.5rem" }}
+                            />
+                            <input
+                                type="text"
+                                placeholder="Destino"
+                                value={destinoEdit}
+                                onChange={e => setDestinoEdit(e.target.value)}
+                                required
+                                style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
+                                    borderRadius: "8px", fontSize: "0.9rem", outline: "none", marginBottom: "0.5rem" }}
+                            />
+                            <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                                <input
+                                    type="date"
+                                    value={dataInicioEdit}
+                                    onChange={e => setDataInicioEdit(e.target.value)}
+                                    required
+                                    style={{ flex: 1, padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
+                                        borderRadius: "8px", fontSize: "0.9rem", outline: "none" }}
+                                />
+                                <input
+                                    type="date"
+                                    value={dataFimEdit}
+                                    onChange={e => setDataFimEdit(e.target.value)}
+                                    required
+                                    style={{ flex: 1, padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
+                                        borderRadius: "8px", fontSize: "0.9rem", outline: "none" }}
+                                />
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                                <Button className="btn-laranja" type="submit">Salvar</Button>
+                                <Button variant="link" style={{ color: "#6b7280", textDecoration: "none" }}
+                                    onClick={() => setMostrarEditarEvento(false)}>
+                                    Cancelar
+                                </Button>
+                            </div>
+                            {erroEditarEvento && (
+                                <p style={{ color: "red", fontSize: "0.85rem", marginTop: "0.5rem" }}>{erroEditarEvento}</p>
+                            )}
+                        </form>
+                    </div>
                 )}
             </Container>
         </div>
@@ -252,7 +373,7 @@ export default function EventosDetailsPage(){
                                 {d.responsavel.nome} · R$ {Number(d.valor).toFixed(2)}
                             </p>
                         </div>
-                        {(d.responsavel.email === usuarioLogado?.email || evento?.criador?.email === usuarioLogado?.email) && (
+                        {d.responsavel.email === usuarioLogado?.email && (
                             <button onClick={() => handleRemoverDespesa(d.id)}
                                 style={{ background: "none", border: "none", color: "#6b7280",
                                     cursor: "pointer", fontSize: "1.1rem", lineHeight: 1 }}>

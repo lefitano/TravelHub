@@ -1,6 +1,7 @@
 package com.travelhub.travelhub.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -53,13 +54,18 @@ public class EventoController {
     @PutMapping("/{id}")
     public ResponseEntity<Evento> atualizar(@PathVariable Long id, @Valid @RequestBody Evento evento) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!eventoService.usuarioParticipa(id, email)) {
+        Optional<Evento> eventoAtualOpt = eventoService.buscarPorId(id);
+        if (eventoAtualOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        boolean ehCriador = eventoAtualOpt.get().getCriador() != null && eventoAtualOpt.get().getCriador().getEmail().equals(email);
+        if(!ehCriador){
             return ResponseEntity.status(403).build();
         }
         try {
             Evento atualizado = eventoService.atualizar(id, evento);
             return ResponseEntity.ok(atualizado);
-        } catch (RuntimeException e) {
+        }catch (RuntimeException e){
             return ResponseEntity.notFound().build();
         }
     }
@@ -67,14 +73,21 @@ public class EventoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!eventoService.usuarioParticipa(id, email)) {
-            return ResponseEntity.status(403).build();
-        }
-        try {
-            eventoService.deletar(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
+        Optional<Evento> eventoAtualOpt = eventoService.buscarPorId(id);
+        if(eventoAtualOpt.isEmpty()){
             return ResponseEntity.notFound().build();
         }
+        boolean ehCriador = eventoAtualOpt.get().getCriador() != null && eventoAtualOpt.get().getCriador().getEmail().equals(email);
+            
+        if(!ehCriador){
+            return ResponseEntity.status(403).build();
+        }
+        try{
+            eventoService.deletar(id);
+            return ResponseEntity.noContent().build();
+        } catch(RuntimeException e){
+            return ResponseEntity.notFound().build();
+        }
+
     }
 }

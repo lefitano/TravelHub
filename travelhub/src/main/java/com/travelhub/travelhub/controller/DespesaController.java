@@ -87,10 +87,8 @@ public class DespesaController {
             return ResponseEntity.notFound().build();
         }
         Despesa despesa = despesaOpt.get();
-        boolean ehResponsavel = despesa.getResponsavel().getEmail().equals(email); 
-        boolean ehCriadorDoEvento = despesa.getEvento().getCriador() != null 
-                && despesa.getEvento().getCriador().getEmail().equals(email);
-        if(!ehResponsavel && !ehCriadorDoEvento){
+        boolean ehResponsavel = despesa.getResponsavel().getEmail().equals(email);
+        if(!ehResponsavel){
             return ResponseEntity.status(403).build();
         }
         try {
