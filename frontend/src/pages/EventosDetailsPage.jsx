@@ -5,7 +5,7 @@ import api from "../services/api"
 import NavBar from "../components/NavBar";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/esm/Container";
-import { BsArrowLeft, BsGeoAlt, BsHourglassSplit, BsPeople, BsWallet2 } from "react-icons/bs"
+import { BsArrowLeft, BsGeoAlt, BsHourglassSplit, BsPeople, BsWallet2, BsPersonCircle } from "react-icons/bs"
 
 export default function EventosDetailsPage(){
 
@@ -325,9 +325,25 @@ export default function EventosDetailsPage(){
                         alignItems: "center", padding: "0.75rem 1rem", marginBottom: "0.5rem",
                         backgroundColor: "#ffffff", border: "1px solid #e5e7eb",
                         borderRadius: "8px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
-                        <div>
-                            <p style={{ margin: 0, fontWeight: 600, fontSize: "0.95rem" }}>{p.usuario.nome}</p>
-                            <p style={{ margin: 0, color: "#6b7280", fontSize: "0.8rem" }}>{p.usuario.email}</p>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                            {p.usuario.fotoUrl ? (
+                                <img
+                                    src={`${api.defaults.baseURL}${p.usuario.fotoUrl}`}
+                                    alt={p.usuario.nome}
+                                    style={{ width: "36px", height: "36px", borderRadius: "50%",
+                                        objectFit: "cover", flexShrink: 0 }}
+                                />
+                            ) : (
+                                <div style={{ width: "36px", height: "36px", borderRadius: "50%",
+                                    backgroundColor: "#f5f5f5", display: "flex", alignItems: "center",
+                                    justifyContent: "center", flexShrink: 0 }}>
+                                    <BsPersonCircle size={22} style={{ color: "#ff6b35" }} />
+                                </div>
+                            )}
+                            <div>
+                                <p style={{ margin: 0, fontWeight: 600, fontSize: "0.95rem" }}>{p.usuario.nome}</p>
+                                <p style={{ margin: 0, color: "#6b7280", fontSize: "0.8rem" }}>{p.usuario.email}</p>
+                            </div>
                         </div>
                         {(p.usuario.email === usuarioLogado?.email || evento?.criador?.email === usuarioLogado?.email) && (
                         <button onClick={() => handleRemoverParticipante(p.id)}

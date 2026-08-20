@@ -34,3 +34,6 @@ build/
 
 
 application.properties
+
+# uploads de usuários (fotos de perfil)
+uploads/

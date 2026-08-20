@@ -12,6 +12,7 @@ public class UsuarioResponseDTO {
     private String nome;
     private String email;
     private LocalDateTime dataCadastro;
+    private String fotoUrl;
 
 }
 

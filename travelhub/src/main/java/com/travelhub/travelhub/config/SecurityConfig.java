@@ -36,6 +36,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                     .requestMatchers(HttpMethod.POST, "/auth/login", "/usuarios").permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    // foto de perfil precisa ser carregável direto por uma tag <img>, que não manda
+                    // header de Authorization — por isso é pública (não é dado sensível)
+                    .requestMatchers(HttpMethod.GET, "/usuarios/*/foto").permitAll()
                     .anyRequest().authenticated())
                     .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
                 
