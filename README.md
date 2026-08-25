@@ -100,7 +100,7 @@ com.travelhub.travelhub
   - [x] CRUD de eventos, participantes e despesas
   - [x] Divisão seletiva de despesas (por participante) + dashboard financeiro individual e completo
   - [x] Edição e exclusão de evento (restrito ao criador)
-  - [ ] Página de perfil do usuário
+  - [x] Página de perfil do usuário
   - [ ] Frontend de votações (backend já pronto)
 - [ ] **Sprint 6 — Destino e tipo de evento:** classificação do evento (Viagem/Saída) e busca de destino com autocomplete via API externa
 - [ ] **Sprint 7 — Deploy:** Docker e ambiente de produção
