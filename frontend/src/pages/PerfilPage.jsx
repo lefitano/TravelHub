@@ -4,13 +4,14 @@ import Container from "react-bootstrap/Container"
 import Button from "react-bootstrap/Button"
 import api from "../services/api"
 import { useAuth } from "../context/AuthContext"
-import { BsPersonCircle, BsCameraFill, BsPencilFill } from "react-icons/bs"
+import { BsPersonCircle, BsCameraFill, BsPencilFill, BsShieldLock } from "react-icons/bs"
 
 export default function PerfilPage(){
     const { token, login } = useAuth()
     const [usuario, setUsuario] = useState(null)
     const [erro, setErro] = useState('')
-    const [modoEdicao, setModoEdicao] = useState(false)
+    const [modoEdicaoPerfil, setModoEdicaoPerfil] = useState(false)
+    const [modoTrocaSenha, setModoTrocaSenha] = useState(false)
     const fotoInputRef = useRef(null)
     const [fotoVersao, setFotoVersao] = useState(0)
     const [erroFoto, setErroFoto] = useState('')
@@ -40,17 +41,21 @@ export default function PerfilPage(){
         carregarUsuario()
     }, [])
 
-    function handleAbrirEdicao(){
+    function handleAbrirEdicaoPerfil(){
         setNome(usuario.nome)
         setEmail(usuario.email)
         setErroPerfil('')
         setSucessoPerfil('')
+        setModoEdicaoPerfil(true)
+    }
+
+    function handleAbrirTrocaSenha(){
         setSenhaAtual('')
         setNovaSenha('')
         setConfirmarNovaSenha('')
         setErroSenha('')
         setSucessoSenha('')
-        setModoEdicao(true)
+        setModoTrocaSenha(true)
     }
 
     async function handleSalvarPerfil(e){
@@ -191,103 +196,114 @@ export default function PerfilPage(){
                             Membro desde {new Date(usuario.dataCadastro).toLocaleDateString('pt-BR')}
                         </p>
 
-                        {!modoEdicao && (
-                            <Button className="btn-laranja mt-3" onClick={handleAbrirEdicao}>
-                                <BsPencilFill style={{ marginRight: "0.4rem", marginTop: "-2px" }} />
-                                Editar perfil
-                            </Button>
+                        {!modoEdicaoPerfil && !modoTrocaSenha && (
+                            <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }} className="mt-3">
+                                <Button className="btn-laranja" onClick={handleAbrirEdicaoPerfil}>
+                                    <BsPencilFill style={{ marginRight: "0.4rem", marginTop: "-2px" }} />
+                                    Editar perfil
+                                </Button>
+                                <Button variant="outline-secondary" onClick={handleAbrirTrocaSenha}>
+                                    <BsShieldLock style={{ marginRight: "0.4rem", marginTop: "-2px" }} />
+                                    Alterar senha
+                                </Button>
+                            </div>
                         )}
                     </div>
                 )}
 
-                {modoEdicao && (
-                    <>
-                        <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", padding: "1.5rem",
-                            border: "1px solid #e5e7eb", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", marginTop: "1.5rem" }}>
-                            <h5 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, marginBottom: "1rem" }}>
-                                Dados pessoais
-                            </h5>
-                            <form onSubmit={handleSalvarPerfil}>
-                                <input
-                                    type="text"
-                                    placeholder="Nome"
-                                    value={nome}
-                                    onChange={e => setNome(e.target.value)}
-                                    required
-                                    style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
-                                        borderRadius: "8px", fontSize: "0.9rem", outline: "none", marginBottom: "0.5rem" }}
-                                />
-                                <input
-                                    type="email"
-                                    placeholder="Email"
-                                    value={email}
-                                    onChange={e => setEmail(e.target.value)}
-                                    required
-                                    style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
-                                        borderRadius: "8px", fontSize: "0.9rem", outline: "none", marginBottom: "0.75rem" }}
-                                />
+                {modoEdicaoPerfil && (
+                    <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", padding: "1.5rem",
+                        border: "1px solid #e5e7eb", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", marginTop: "1.5rem" }}>
+                        <h5 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, marginBottom: "1rem" }}>
+                            Dados pessoais
+                        </h5>
+                        <form onSubmit={handleSalvarPerfil}>
+                            <input
+                                type="text"
+                                placeholder="Nome"
+                                value={nome}
+                                onChange={e => setNome(e.target.value)}
+                                required
+                                style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
+                                    borderRadius: "8px", fontSize: "0.9rem", outline: "none", marginBottom: "0.5rem" }}
+                            />
+                            <input
+                                type="email"
+                                placeholder="Email"
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                                required
+                                style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
+                                    borderRadius: "8px", fontSize: "0.9rem", outline: "none", marginBottom: "0.75rem" }}
+                            />
+                            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
                                 <Button className="btn-laranja" type="submit">Salvar</Button>
-                                {erroPerfil && (
-                                    <p style={{ color: "red", fontSize: "0.85rem", marginTop: "0.5rem" }}>{erroPerfil}</p>
-                                )}
-                                {sucessoPerfil && (
-                                    <p style={{ color: "green", fontSize: "0.85rem", marginTop: "0.5rem" }}>{sucessoPerfil}</p>
-                                )}
-                            </form>
-                        </div>
+                                <Button variant="link" style={{ color: "#6b7280", textDecoration: "none" }}
+                                    onClick={() => setModoEdicaoPerfil(false)}>
+                                    Fechar
+                                </Button>
+                            </div>
+                            {erroPerfil && (
+                                <p style={{ color: "red", fontSize: "0.85rem", marginTop: "0.5rem" }}>{erroPerfil}</p>
+                            )}
+                            {sucessoPerfil && (
+                                <p style={{ color: "green", fontSize: "0.85rem", marginTop: "0.5rem" }}>{sucessoPerfil}</p>
+                            )}
+                        </form>
+                    </div>
+                )}
 
-                        <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", padding: "1.5rem",
-                            border: "1px solid #e5e7eb", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", marginTop: "1rem" }}>
-                            <h5 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, marginBottom: "1rem" }}>
-                                Trocar senha
-                            </h5>
-                            <form onSubmit={handleTrocarSenha}>
-                                <input
-                                    type="password"
-                                    placeholder="Senha atual"
-                                    value={senhaAtual}
-                                    onChange={e => setSenhaAtual(e.target.value)}
-                                    required
-                                    style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
-                                        borderRadius: "8px", fontSize: "0.9rem", outline: "none", marginBottom: "0.5rem" }}
-                                />
-                                <input
-                                    type="password"
-                                    placeholder="Nova senha"
-                                    value={novaSenha}
-                                    onChange={e => setNovaSenha(e.target.value)}
-                                    required
-                                    minLength={6}
-                                    style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
-                                        borderRadius: "8px", fontSize: "0.9rem", outline: "none", marginBottom: "0.5rem" }}
-                                />
-                                <input
-                                    type="password"
-                                    placeholder="Confirmar nova senha"
-                                    value={confirmarNovaSenha}
-                                    onChange={e => setConfirmarNovaSenha(e.target.value)}
-                                    required
-                                    minLength={6}
-                                    style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
-                                        borderRadius: "8px", fontSize: "0.9rem", outline: "none", marginBottom: "0.75rem" }}
-                                />
+                {modoTrocaSenha && (
+                    <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", padding: "1.5rem",
+                        border: "1px solid #e5e7eb", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", marginTop: "1.5rem" }}>
+                        <h5 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, marginBottom: "1rem" }}>
+                            Alterar senha
+                        </h5>
+                        <form onSubmit={handleTrocarSenha}>
+                            <input
+                                type="password"
+                                placeholder="Senha atual"
+                                value={senhaAtual}
+                                onChange={e => setSenhaAtual(e.target.value)}
+                                required
+                                style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
+                                    borderRadius: "8px", fontSize: "0.9rem", outline: "none", marginBottom: "0.5rem" }}
+                            />
+                            <input
+                                type="password"
+                                placeholder="Nova senha"
+                                value={novaSenha}
+                                onChange={e => setNovaSenha(e.target.value)}
+                                required
+                                minLength={6}
+                                style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
+                                    borderRadius: "8px", fontSize: "0.9rem", outline: "none", marginBottom: "0.5rem" }}
+                            />
+                            <input
+                                type="password"
+                                placeholder="Confirmar nova senha"
+                                value={confirmarNovaSenha}
+                                onChange={e => setConfirmarNovaSenha(e.target.value)}
+                                required
+                                minLength={6}
+                                style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
+                                    borderRadius: "8px", fontSize: "0.9rem", outline: "none", marginBottom: "0.75rem" }}
+                            />
+                            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
                                 <Button className="btn-laranja" type="submit">Trocar senha</Button>
-                                {erroSenha && (
-                                    <p style={{ color: "red", fontSize: "0.85rem", marginTop: "0.5rem" }}>{erroSenha}</p>
-                                )}
-                                {sucessoSenha && (
-                                    <p style={{ color: "green", fontSize: "0.85rem", marginTop: "0.5rem" }}>{sucessoSenha}</p>
-                                )}
-                            </form>
-                        </div>
-
-                        <div style={{ textAlign: "center", marginTop: "1rem" }}>
-                            <Button variant="link" style={{ color: "#6b7280", textDecoration: "none" }}
-                                onClick={() => setModoEdicao(false)}>
-                                Fechar edição
-                            </Button>
-                        </div>
-                    </>
+                                <Button variant="link" style={{ color: "#6b7280", textDecoration: "none" }}
+                                    onClick={() => setModoTrocaSenha(false)}>
+                                    Fechar
+                                </Button>
+                            </div>
+                            {erroSenha && (
+                                <p style={{ color: "red", fontSize: "0.85rem", marginTop: "0.5rem" }}>{erroSenha}</p>
+                            )}
+                            {sucessoSenha && (
+                                <p style={{ color: "green", fontSize: "0.85rem", marginTop: "0.5rem" }}>{sucessoSenha}</p>
+                            )}
+                        </form>
+                    </div>
                 )}
             </Container>
         </div>
