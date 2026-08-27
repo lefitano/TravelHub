@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,6 +17,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.EnumType;
 
 @Entity
 @Data
@@ -42,7 +44,13 @@ public class Evento {
     @Column(nullable = false)
     @NotNull(message = "A data final do evento é obrigatória")
     private LocalDate dataFim;
+    @Column(nullable = true)
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "O tipo do evento é obrigatório")
+    private TipoEvento tipo;
     @ManyToOne
     @JoinColumn(name = "criador_id")
     private Usuario criador;
+  
+
 }
