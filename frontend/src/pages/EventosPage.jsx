@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api";
 import NavBar from "../components/NavBar";
 import Container from "react-bootstrap/Container";
@@ -8,7 +8,8 @@ import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 import Card from "react-bootstrap/Card";
 import Form from "react-bootstrap/Form";
-import { BsCalendar3 } from "react-icons/bs";
+import { BsCalendar3, BsSuitcaseLg, BsGeoAltFill } from "react-icons/bs";
+import DestinoAutocomplete from "../components/DestinoAutocomplete";
 
 export default function EventosPage() {
   const [eventos, setEventos] = useState([]);
@@ -18,10 +19,22 @@ export default function EventosPage() {
   const [destino, setDestino] = useState("");
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
+  const [tipo, setTipo] = useState("VIAGEM");
   const [erroForm, setErroForm] = useState("");
   const [erroCarregamento, setErroCarregamento] = useState('');
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const [ultimaLocationKey, setUltimaLocationKey] = useState(location.key);
+
+  // toda navegação pra essa página (mesmo clicando em "Eventos" já estando aqui)
+  // gera um location.key novo — comparamos durante a renderização (em vez de um
+  // useEffect) pra sempre voltar pra lista, já que só mudar a URL não reseta
+  // sozinho o estado de um componente que já está montado
+  if (location.key !== ultimaLocationKey) {
+    setUltimaLocationKey(location.key);
+    setMostrarForm(false);
+  }
 
   useEffect(() => {
     async function carregarEventos() {
@@ -46,6 +59,7 @@ export default function EventosPage() {
         destino,
         dataInicio,
         dataFim,
+        tipo,
       });
       setMostrarForm(false);
       setNome("");
@@ -53,6 +67,7 @@ export default function EventosPage() {
       setDestino("");
       setDataInicio("");
       setDataFim("");
+      setTipo("VIAGEM");
       const resposta = await api.get("/eventos/meus");
       setEventos(resposta.data);
     } catch (error) {
@@ -117,6 +132,37 @@ export default function EventosPage() {
               </h2>
               <Form onSubmit={handleCriarEvento}>
                 <Form.Group className="mb-3">
+                  <Form.Label>Tipo de evento:</Form.Label>
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <button
+                      type="button"
+                      onClick={() => setTipo("VIAGEM")}
+                      style={{
+                        flex: 1, padding: "0.5rem", borderRadius: "8px", cursor: "pointer",
+                        border: tipo === "VIAGEM" ? "2px solid #ff6b35" : "1px solid #e5e7eb",
+                        backgroundColor: tipo === "VIAGEM" ? "#fff4ef" : "#ffffff",
+                        color: tipo === "VIAGEM" ? "#ff6b35" : "#6b7280",
+                        fontWeight: tipo === "VIAGEM" ? 700 : 400
+                      }}>
+                      <BsSuitcaseLg style={{ marginRight: "0.4rem", marginTop: "-2px" }} />
+                      Viagem
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTipo("SAIDA")}
+                      style={{
+                        flex: 1, padding: "0.5rem", borderRadius: "8px", cursor: "pointer",
+                        border: tipo === "SAIDA" ? "2px solid #ff6b35" : "1px solid #e5e7eb",
+                        backgroundColor: tipo === "SAIDA" ? "#fff4ef" : "#ffffff",
+                        color: tipo === "SAIDA" ? "#ff6b35" : "#6b7280",
+                        fontWeight: tipo === "SAIDA" ? 700 : 400
+                      }}>
+                      <BsGeoAltFill style={{ marginRight: "0.4rem", marginTop: "-2px" }} />
+                      Saída
+                    </button>
+                  </div>
+                </Form.Group>
+                <Form.Group className="mb-3">
                   <Form.Label>Nome do evento:</Form.Label>
                   <Form.Control
                     type="text"
@@ -136,10 +182,10 @@ export default function EventosPage() {
                 </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Label>Destino:</Form.Label>
-                  <Form.Control
-                    type="text"
+                  <DestinoAutocomplete
+                    className="form-control"
                     value={destino}
-                    onChange={(e) => setDestino(e.target.value)}
+                    onChange={setDestino}
                     required
                   />
                 </Form.Group>
@@ -200,9 +246,20 @@ export default function EventosPage() {
                         style={{ backgroundColor: "#ffffff" }}
                       >
                         <Card.Body>
-                          <Card.Title style={{ fontWeight: 700 }}>
-                            {evento.nome}
-                          </Card.Title>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                            <Card.Title style={{ fontWeight: 700 }}>
+                              {evento.nome}
+                            </Card.Title>
+                            {evento.tipo && (
+                              <span style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem",
+                                fontSize: "0.7rem", fontWeight: 700, color: "#ff6b35",
+                                backgroundColor: "#fff4ef", borderRadius: "999px", padding: "0.15rem 0.6rem",
+                                whiteSpace: "nowrap" }}>
+                                {evento.tipo === "VIAGEM" ? <BsSuitcaseLg /> : <BsGeoAltFill />}
+                                {evento.tipo === "VIAGEM" ? "Viagem" : "Saída"}
+                              </span>
+                            )}
+                          </div>
                           <Card.Text style={{ color: "#6b7280", fontSize: "0.78rem", marginBottom: "0.25rem" }}>
                             Criado por {evento.criador?.nome ?? "desconhecido"}
                           </Card.Text>

@@ -5,7 +5,8 @@ import api from "../services/api"
 import NavBar from "../components/NavBar";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/esm/Container";
-import { BsArrowLeft, BsGeoAlt, BsHourglassSplit, BsPeople, BsWallet2, BsPersonCircle } from "react-icons/bs"
+import { BsArrowLeft, BsGeoAlt, BsHourglassSplit, BsPeople, BsWallet2, BsPersonCircle, BsSuitcaseLg, BsGeoAltFill } from "react-icons/bs"
+import DestinoAutocomplete from "../components/DestinoAutocomplete"
 
 export default function EventosDetailsPage(){
 
@@ -29,6 +30,7 @@ export default function EventosDetailsPage(){
     const [destinoEdit, setDestinoEdit] = useState('')
     const [dataInicioEdit, setDataInicioEdit] = useState('')
     const [dataFimEdit, setDataFimEdit] = useState('')
+    const [tipoEdit, setTipoEdit] = useState('VIAGEM')
     const [erroEditarEvento, setErroEditarEvento] = useState('')
 
     const diasRestantes = evento
@@ -128,6 +130,7 @@ export default function EventosDetailsPage(){
         setDestinoEdit(evento.destino)
         setDataInicioEdit(evento.dataInicio)
         setDataFimEdit(evento.dataFim)
+        setTipoEdit(evento.tipo ?? 'VIAGEM')
         setErroEditarEvento('')
         setMostrarEditarEvento(true)
     }
@@ -141,7 +144,8 @@ export default function EventosDetailsPage(){
                 descricao: descricaoEdit,
                 destino: destinoEdit,
                 dataInicio: dataInicioEdit,
-                dataFim: dataFimEdit
+                dataFim: dataFimEdit,
+                tipo: tipoEdit
             })
             setEvento(res.data)
             setMostrarEditarEvento(false)
@@ -177,10 +181,21 @@ export default function EventosDetailsPage(){
                 {evento && !mostrarEditarEvento && (
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                         <div>
-                            <h2 style={{ color: "#ffffff", fontFamily: "Raleway, sans-serif",
-                                fontWeight: 700, margin: 0 }}>
-                                {evento.nome}
-                            </h2>
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                                <h2 style={{ color: "#ffffff", fontFamily: "Raleway, sans-serif",
+                                    fontWeight: 700, margin: 0 }}>
+                                    {evento.nome}
+                                </h2>
+                                {evento.tipo && (
+                                    <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem",
+                                        fontSize: "0.72rem", fontWeight: 700, color: "#ff6b35",
+                                        backgroundColor: "#2a2a2a", borderRadius: "999px", padding: "0.2rem 0.7rem",
+                                        whiteSpace: "nowrap" }}>
+                                        {evento.tipo === "VIAGEM" ? <BsSuitcaseLg /> : <BsGeoAltFill />}
+                                        {evento.tipo === "VIAGEM" ? "Viagem" : "Saída"}
+                                    </span>
+                                )}
+                            </div>
                             <p style={{ color: "#6b7280", margin: "0.25rem 0 0", fontSize: "0.8rem" }}>
                                 Criado por {evento.criador?.nome ?? "desconhecido"}
                             </p>
@@ -202,6 +217,34 @@ export default function EventosDetailsPage(){
                     <div style={{ backgroundColor: "#ffffff", borderRadius: "12px",
                         padding: "1.25rem 1.5rem", maxWidth: "480px" }}>
                         <form onSubmit={handleSalvarEdicao}>
+                            <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                                <button
+                                    type="button"
+                                    onClick={() => setTipoEdit("VIAGEM")}
+                                    style={{
+                                        flex: 1, padding: "0.5rem", borderRadius: "8px", cursor: "pointer",
+                                        border: tipoEdit === "VIAGEM" ? "2px solid #ff6b35" : "1px solid #e5e7eb",
+                                        backgroundColor: tipoEdit === "VIAGEM" ? "#fff4ef" : "#ffffff",
+                                        color: tipoEdit === "VIAGEM" ? "#ff6b35" : "#6b7280",
+                                        fontWeight: tipoEdit === "VIAGEM" ? 700 : 400
+                                    }}>
+                                    <BsSuitcaseLg style={{ marginRight: "0.4rem", marginTop: "-2px" }} />
+                                    Viagem
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setTipoEdit("SAIDA")}
+                                    style={{
+                                        flex: 1, padding: "0.5rem", borderRadius: "8px", cursor: "pointer",
+                                        border: tipoEdit === "SAIDA" ? "2px solid #ff6b35" : "1px solid #e5e7eb",
+                                        backgroundColor: tipoEdit === "SAIDA" ? "#fff4ef" : "#ffffff",
+                                        color: tipoEdit === "SAIDA" ? "#ff6b35" : "#6b7280",
+                                        fontWeight: tipoEdit === "SAIDA" ? 700 : 400
+                                    }}>
+                                    <BsGeoAltFill style={{ marginRight: "0.4rem", marginTop: "-2px" }} />
+                                    Saída
+                                </button>
+                            </div>
                             <input
                                 type="text"
                                 placeholder="Nome do evento"
@@ -220,11 +263,10 @@ export default function EventosDetailsPage(){
                                 style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
                                     borderRadius: "8px", fontSize: "0.9rem", outline: "none", marginBottom: "0.5rem" }}
                             />
-                            <input
-                                type="text"
+                            <DestinoAutocomplete
                                 placeholder="Destino"
                                 value={destinoEdit}
-                                onChange={e => setDestinoEdit(e.target.value)}
+                                onChange={setDestinoEdit}
                                 required
                                 style={{ width: "100%", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
                                     borderRadius: "8px", fontSize: "0.9rem", outline: "none", marginBottom: "0.5rem" }}

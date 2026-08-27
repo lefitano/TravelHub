@@ -46,11 +46,13 @@ A API sobe na porta **8000**.
 
 ### Frontend
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+1. Copie `frontend/.env.example` para `frontend/.env` e preencha `VITE_GEOAPIFY_KEY` com uma chave gratuita do [Geoapify](https://myprojects.geoapify.com) (usada na busca de destino com autocomplete — sem essa chave, o campo de destino continua funcionando como texto livre, só sem sugestões)
+2. Execute:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
 
 A aplicação sobe na porta **5173**. O backend já vem configurado (`SecurityConfig`) pra aceitar CORS dessa origem.
 
@@ -102,7 +104,9 @@ com.travelhub.travelhub
   - [x] Edição e exclusão de evento (restrito ao criador)
   - [x] Página de perfil do usuário
   - [ ] Frontend de votações (backend já pronto)
-- [ ] **Sprint 6 — Destino e tipo de evento:** classificação do evento (Viagem/Saída) e busca de destino com autocomplete via API externa
+- [ ] **Sprint 6 — Destino e tipo de evento:**
+  - [x] Tipo de evento (Viagem/Saída) — campo, validação, seletor visual nos forms de criar/editar
+  - [x] Busca de destino com autocomplete (Geoapify) — implementado, aguardando chave de API real para teste ponta a ponta
 - [ ] **Sprint 7 — Deploy:** Docker e ambiente de produção
 
 ## Endpoints implementados
