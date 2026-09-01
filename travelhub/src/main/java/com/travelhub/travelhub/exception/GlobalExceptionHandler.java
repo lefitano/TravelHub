@@ -24,4 +24,23 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.badRequest().body(erros);
     }
+
+    // regra de negócio violada (ex: data final antes da data de início) — usado
+    // como rede de segurança; os controllers que lançam isso normalmente já
+    // capturam localmente pra devolver 400 direto, mas fica aqui como fallback
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> tratarArgumentoInvalido(IllegalArgumentException ex) {
+        Map<String, String> erro = new HashMap<>();
+        erro.put("erro", ex.getMessage());
+        return ResponseEntity.badRequest().body(erro);
+    }
+
+    // conflito de estado (ex: usuário já é participante do evento, conta não pode
+    // ser excluída enquanto participa de eventos) — mesma lógica de rede de segurança
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, String>> tratarConflito(IllegalStateException ex) {
+        Map<String, String> erro = new HashMap<>();
+        erro.put("erro", ex.getMessage());
+        return ResponseEntity.status(409).body(erro);
+    }
 }

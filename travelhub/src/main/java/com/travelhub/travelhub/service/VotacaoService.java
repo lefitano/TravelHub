@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.travelhub.travelhub.dto.CriarVotacaoDTO;
+import com.travelhub.travelhub.model.Evento;
 import com.travelhub.travelhub.model.OpcaoVoto;
 import com.travelhub.travelhub.model.Votacao;
 import com.travelhub.travelhub.repository.OpcaoVotoRepository;
@@ -24,7 +26,13 @@ public class VotacaoService {
     @Autowired
     private VotoRepository votoRepository;
 
-    public Votacao salvar(Votacao votacao) {
+    // recebe um DTO sem "id" + o Evento já validado pelo controller (em vez da
+    // entidade Votacao direto) — evita que um client sobrescreva a votação de
+    // outra pessoa passando o id dela no corpo da requisição (mass assignment)
+    public Votacao salvar(CriarVotacaoDTO dto, Evento evento) {
+        Votacao votacao = new Votacao();
+        votacao.setTitulo(dto.getTitulo());
+        votacao.setEvento(evento);
         return votacaoRepository.save(votacao);
     }
 

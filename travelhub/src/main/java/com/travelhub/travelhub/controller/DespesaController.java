@@ -68,7 +68,9 @@ public class DespesaController {
         if (despesaAtualOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        if (!eventoService.usuarioParticipa(despesaAtualOpt.get().getEvento().getId(), email)) {
+        // só o responsável pela despesa pode editá-la — mesma regra já aplicada na exclusão,
+        // antes disso qualquer participante do evento conseguia editar a despesa de outra pessoa
+        if (!despesaAtualOpt.get().getResponsavel().getEmail().equals(email)) {
             return ResponseEntity.status(403).build();
         }
         try {

@@ -133,7 +133,7 @@ export default function EventosDetailsPage(){
         e.preventDefault()
         setErroVotacao('')
         try{
-            await api.post('/votacoes', { titulo: tituloVotacao, evento: { id: Number(id) } })
+            await api.post('/votacoes', { titulo: tituloVotacao, eventoId: Number(id) })
             setTituloVotacao('')
             const res = await api.get(`/votacoes/evento/${id}`)
             setVotacoes(res.data)

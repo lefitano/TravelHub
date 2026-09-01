@@ -16,8 +16,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.travelhub.travelhub.repository.EventoRepository;
+import com.travelhub.travelhub.repository.ParticipanteRepository;
 import com.travelhub.travelhub.repository.UsuarioRepository;
 import com.travelhub.travelhub.dto.AtualizarPerfilDTO;
+import com.travelhub.travelhub.dto.CadastroUsuarioDTO;
 import com.travelhub.travelhub.dto.TrocarSenhaDTO;
 import com.travelhub.travelhub.model.Usuario;
 
@@ -29,9 +32,19 @@ public class UsuarioService {
     private UsuarioRepository usuarioRepository; // chamei o repository para acessar o banco
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private EventoRepository eventoRepository;
+    @Autowired
+    private ParticipanteRepository participanteRepository;
 
-    public Usuario salvar(Usuario usuario) { // o método de save já está feito pelo framework Spring JPA
-        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+    // recebe um DTO sem "id" (em vez da entidade Usuario direto) — se aceitássemos
+    // a entidade, um client poderia mandar um id de usuário existente e o Spring
+    // faria merge() nele, sobrescrevendo a conta de outra pessoa (mass assignment)
+    public Usuario salvar(CadastroUsuarioDTO dto) {
+        Usuario usuario = new Usuario();
+        usuario.setNome(dto.getNome());
+        usuario.setEmail(dto.getEmail());
+        usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
         usuario.setDataCadastro(LocalDateTime.now());
         return usuarioRepository.save(usuario);
     }
@@ -51,6 +64,19 @@ public class UsuarioService {
     }
 
     public void deletar(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        // sem cascade automático aqui de propósito: apagar a conta não pode arrastar
+        // eventos/despesas que também pertencem a OUTRAS pessoas (ex: outros
+        // participantes de um evento criado por esse usuário). Por ora, bloqueia
+        // a exclusão até o usuário sair de todos os eventos primeiro.
+        boolean criouAlgumEvento = !eventoRepository.findByCriadorId(id).isEmpty();
+        boolean participaDeAlgumEvento = !participanteRepository.findByUsuarioEmail(usuario.getEmail()).isEmpty();
+        if (criouAlgumEvento || participaDeAlgumEvento) {
+            throw new IllegalStateException("Não é possível excluir a conta enquanto você participa de eventos");
+        }
+
         usuarioRepository.deleteById(id);
     }
     public Optional<Usuario> buscarPorEmail(String email){
