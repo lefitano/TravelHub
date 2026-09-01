@@ -97,7 +97,7 @@ com.travelhub.travelhub
 - [x] **Sprint 2 — CRUD:** repositórios, services e controllers para Usuários, Eventos e Participantes
 - [x] **Sprint 3 — Regras de Negócio:** divisão de despesas, controle financeiro e votações
 - [x] **Sprint 4 — Segurança:** Spring Security, autenticação JWT e controle de acesso
-- [ ] **Sprint 5 — Frontend:** React, dashboard, eventos e financeiro
+- [x] **Sprint 5 — Frontend:** React, dashboard, eventos e financeiro
   - [x] Landing page, autenticação (login/cadastro) e dashboard
   - [x] CRUD de eventos, participantes e despesas
   - [x] Divisão seletiva de despesas (por participante) + dashboard financeiro individual e completo
