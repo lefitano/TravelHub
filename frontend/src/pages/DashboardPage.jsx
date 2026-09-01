@@ -6,23 +6,29 @@ import Card from "react-bootstrap/Card";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Button from "react-bootstrap/Button";
+import { BsPersonCircle } from "react-icons/bs";
 
 export default function DashBoardPage() {
   const [eventos, setEventos] = useState([]);
+  const [usuario, setUsuario] = useState(null);
   const navigate = useNavigate();
   const { nome } = useAuth();
   const [erroCarregamento, setErroCarregamento] = useState("");
 
   useEffect(() => {
-    async function carregarEventos() {
+    async function carregarDados() {
       try {
-        const resposta = await api.get("/eventos/meus");
-        setEventos(resposta.data);
-      } catch (erro) {
+        const [resEventos, resUsuario] = await Promise.all([
+          api.get("/eventos/meus"),
+          api.get("/usuarios/me"),
+        ]);
+        setEventos(resEventos.data);
+        setUsuario(resUsuario.data);
+      } catch {
         setErroCarregamento("Não foi possível carregar os eventos");
       }
     }
-    carregarEventos();
+    carregarDados();
   }, []);
   const proximoEvento = eventos
     .filter((e) => new Date(e.dataInicio) >= new Date())
@@ -47,35 +53,53 @@ export default function DashBoardPage() {
       ></hr>
       <div style={{ backgroundColor: "#111111", padding: "2.5rem 2rem" }}>
         <Container>
-          <p
-            style={{
-              color: "#6b7280",
-              margin: 0,
-              fontSize: "0.9rem",
-              textTransform: "capitalize",
-            }}
-          >
-            {hoje}
-          </p>
-          <h2
-            style={{
-              color: "#ffffff",
-              fontFamily: "Raleway, sans-serif",
-              fontWeight: 700,
-              margin: "0.25rem 0 0",
-            }}
-          >
-            Olá, <span style={{ color: "#ff6b35" }}>{nome}</span>!
-          </h2>
-          <p
-            style={{
-              color: "#6b7280",
-              margin: "0.25rem 0 0",
-              fontSize: "0.95rem",
-            }}
-          >
-            Bem-vindo de volta ao TravelHub.
-          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            {usuario?.fotoUrl ? (
+              <img
+                src={`${api.defaults.baseURL}${usuario.fotoUrl}`}
+                alt="Foto de perfil"
+                style={{ width: "64px", height: "64px", borderRadius: "50%",
+                  objectFit: "cover", border: "3px solid #ff6b35", flexShrink: 0 }}
+              />
+            ) : (
+              <div style={{ width: "64px", height: "64px", borderRadius: "50%",
+                border: "3px solid #ff6b35", display: "flex", alignItems: "center",
+                justifyContent: "center", backgroundColor: "#1c1c1c", flexShrink: 0 }}>
+                <BsPersonCircle size={38} style={{ color: "#ff6b35" }} />
+              </div>
+            )}
+            <div>
+              <p
+                style={{
+                  color: "#6b7280",
+                  margin: 0,
+                  fontSize: "0.9rem",
+                  textTransform: "capitalize",
+                }}
+              >
+                {hoje}
+              </p>
+              <h2
+                style={{
+                  color: "#ffffff",
+                  fontFamily: "Raleway, sans-serif",
+                  fontWeight: 700,
+                  margin: "0.25rem 0 0",
+                }}
+              >
+                Olá, <span style={{ color: "#ff6b35" }}>{nome}</span>!
+              </h2>
+              <p
+                style={{
+                  color: "#6b7280",
+                  margin: "0.25rem 0 0",
+                  fontSize: "0.95rem",
+                }}
+              >
+                Bem-vindo de volta ao TravelHub.
+              </p>
+            </div>
+          </div>
         </Container>
       </div>
       <hr
