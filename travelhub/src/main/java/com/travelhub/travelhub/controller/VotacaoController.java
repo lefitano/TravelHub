@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.travelhub.travelhub.model.Evento;
 import com.travelhub.travelhub.model.Votacao;
 import com.travelhub.travelhub.service.EventoService;
 import com.travelhub.travelhub.service.VotacaoService;
@@ -31,7 +32,16 @@ public class VotacaoController {
     @PostMapping
     public ResponseEntity<Votacao> criar(@RequestBody Votacao votacao) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (votacao.getEvento() == null || !eventoService.usuarioParticipa(votacao.getEvento().getId(), email)) {
+        if (votacao.getEvento() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        Optional<Evento> eventoOpt = eventoService.buscarPorId(votacao.getEvento().getId());
+        if (eventoOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        boolean ehCriador = eventoOpt.get().getCriador() != null
+                && eventoOpt.get().getCriador().getEmail().equals(email);
+        if (!ehCriador) {
             return ResponseEntity.status(403).build();
         }
         Votacao salva = votacaoService.salvar(votacao);
@@ -67,7 +77,9 @@ public class VotacaoController {
         if (votacaoAtualOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        if (!eventoService.usuarioParticipa(votacaoAtualOpt.get().getEvento().getId(), email)) {
+        boolean ehCriador = votacaoAtualOpt.get().getEvento().getCriador() != null
+                && votacaoAtualOpt.get().getEvento().getCriador().getEmail().equals(email);
+        if (!ehCriador) {
             return ResponseEntity.status(403).build();
         }
         try {
@@ -85,7 +97,9 @@ public class VotacaoController {
         if (votacaoOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        if (!eventoService.usuarioParticipa(votacaoOpt.get().getEvento().getId(), email)) {
+        boolean ehCriador = votacaoOpt.get().getEvento().getCriador() != null
+                && votacaoOpt.get().getEvento().getCriador().getEmail().equals(email);
+        if (!ehCriador) {
             return ResponseEntity.status(403).build();
         }
         try {

@@ -42,7 +42,9 @@ public class OpcaoVotoController {
         if (votacaoOpt.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        if (!eventoService.usuarioParticipa(votacaoOpt.get().getEvento().getId(), email)) {
+        boolean ehCriador = votacaoOpt.get().getEvento().getCriador() != null
+                && votacaoOpt.get().getEvento().getCriador().getEmail().equals(email);
+        if (!ehCriador) {
             return ResponseEntity.status(403).build();
         }
         OpcaoVoto salvo = opcaoVotoService.salvar(opcaoVoto);
@@ -82,7 +84,9 @@ public class OpcaoVotoController {
         if (opcaoVotoAtualOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        if (!eventoService.usuarioParticipa(opcaoVotoAtualOpt.get().getVotacao().getEvento().getId(), email)) {
+        boolean ehCriador = opcaoVotoAtualOpt.get().getVotacao().getEvento().getCriador() != null
+                && opcaoVotoAtualOpt.get().getVotacao().getEvento().getCriador().getEmail().equals(email);
+        if (!ehCriador) {
             return ResponseEntity.status(403).build();
         }
         try {
@@ -100,7 +104,9 @@ public class OpcaoVotoController {
         if (opcaoVotoOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        if (!eventoService.usuarioParticipa(opcaoVotoOpt.get().getVotacao().getEvento().getId(), email)) {
+        boolean ehCriador = opcaoVotoOpt.get().getVotacao().getEvento().getCriador() != null
+                && opcaoVotoOpt.get().getVotacao().getEvento().getCriador().getEmail().equals(email);
+        if (!ehCriador) {
             return ResponseEntity.status(403).build();
         }
         try {

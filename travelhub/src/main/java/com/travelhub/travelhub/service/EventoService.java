@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.travelhub.travelhub.repository.EventoRepository;
 import com.travelhub.travelhub.repository.ParticipanteRepository;
 import com.travelhub.travelhub.repository.UsuarioRepository;
+import com.travelhub.travelhub.repository.VotacaoRepository;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import com.travelhub.travelhub.model.Evento;
 import com.travelhub.travelhub.model.Participante;
 import com.travelhub.travelhub.model.StatusPagamento;
 import com.travelhub.travelhub.model.Usuario;
+import com.travelhub.travelhub.model.Votacao;
 
 @Service
 
@@ -29,6 +31,10 @@ public class EventoService {
     private ParticipanteRepository participanteRepository;
     @Autowired
     private UsuarioRepository usuarioRepository;
+    @Autowired
+    private VotacaoRepository votacaoRepository;
+    @Autowired
+    private VotacaoService votacaoService;
 
 
     EventoService(DespesaRepository despesaRepository) {
@@ -65,12 +71,17 @@ public class EventoService {
                     evento.setDescricao(eventoAtualizado.getDescricao());
                     evento.setDestino(eventoAtualizado.getDestino());
                     evento.setNome(eventoAtualizado.getNome());
+                    evento.setTipo(eventoAtualizado.getTipo());
                     return eventoRepository.save(evento);
                 })
                 .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
     }
 @Transactional
     public void deletar(Long id) {
+        List<Votacao> votacoes = votacaoRepository.findByEventoId(id);
+        for (Votacao votacao : votacoes) {
+            votacaoService.deletar(votacao.getId());
+        }
         despesaRepository.deleteAll(despesaRepository.findByEventoId(id));
         participanteRepository.deleteAll(participanteRepository.findByEventoId(id));
         eventoRepository.deleteById(id);

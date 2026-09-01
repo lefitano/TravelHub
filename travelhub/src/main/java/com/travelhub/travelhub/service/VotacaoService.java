@@ -7,14 +7,22 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.travelhub.travelhub.model.OpcaoVoto;
 import com.travelhub.travelhub.model.Votacao;
+import com.travelhub.travelhub.repository.OpcaoVotoRepository;
+import com.travelhub.travelhub.repository.VotoRepository;
 
 @Service
 
 public class VotacaoService {
     @Autowired
     private VotacaoRepository votacaoRepository;
+    @Autowired
+    private OpcaoVotoRepository opcaoVotoRepository;
+    @Autowired
+    private VotoRepository votoRepository;
 
     public Votacao salvar(Votacao votacao) {
         return votacaoRepository.save(votacao);
@@ -37,7 +45,11 @@ public class VotacaoService {
                 .orElseThrow(() -> new RuntimeException("Votação não encontrada"));
     }
 
+    @Transactional
     public void deletar(Long id) {
+        List<OpcaoVoto> opcoes = opcaoVotoRepository.findByVotacaoId(id);
+        votoRepository.deleteAll(votoRepository.findByOpcaoVoto_Votacao_Id(id));
+        opcaoVotoRepository.deleteAll(opcoes);
         votacaoRepository.deleteById(id);
     }
 
