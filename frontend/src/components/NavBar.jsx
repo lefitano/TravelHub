@@ -7,12 +7,17 @@ import {useAuth} from'../context/AuthContext';
 
 function NavBar(){
     const navigate = useNavigate();
-    const {logout} = useAuth();
+    const {logout, token} = useAuth();
 
     function handleSair(){
         logout();
         navigate('/');
     }
+
+    function handleLogoClick(){
+        navigate(token ? '/dashboard' : '/');
+    }
+
     return (
         <Navbar
           expand="lg"
@@ -20,7 +25,7 @@ function NavBar(){
           style={{ backgroundColor: "var(--cor-navbar-footer)" }}
         >
           <Container>
-            <Navbar.Brand onClick = {() => navigate('/')} style={{cursor: 'pointer'}} className="logo-gradiente"> 
+            <Navbar.Brand onClick = {handleLogoClick} style={{cursor: 'pointer'}} className="logo-gradiente">
                 TravelHub
             </Navbar.Brand>
             <Nav className="ms-auto">
