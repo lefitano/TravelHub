@@ -1,6 +1,6 @@
 import AuthNavBar from "../components/AuthNavBar";
 import { useState } from "react";
-import {useNavigate } from "react-router-dom";
+import {useNavigate, useLocation } from "react-router-dom";
 import {useAuth} from '../context/AuthContext';
 import {login as loginService} from '../services/authService';
 import Card from "react-bootstrap/Card";
@@ -9,7 +9,8 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import api from '../services/api';
 export default function AuthPage() {
-  const [modo, setModo] = useState("login");
+  const location = useLocation();
+  const [modo, setModo] = useState(location.state?.modo === "cadastro" ? "cadastro" : "login");
   const navigate = useNavigate();
   const {login} = useAuth();
   const [email, setEmail] = useState('');
@@ -33,7 +34,7 @@ export default function AuthPage() {
       const resposta = await loginService(email,senha)
       login (resposta.data.token, resposta.data.nome)
       navigate('/dashboard')
-    } catch(error){
+    } catch{
       setErro('Email ou senha incorretos.')
     }
   }
@@ -47,7 +48,7 @@ export default function AuthPage() {
       await api.post('/usuarios' , {nome, email: emailCadastro, senha: senhaCadastro})
       setSucessoCadastro('Cadastro realizado! Faça seu login.' )
       setModo('login')
-    }catch(error){
+    }catch{
       setErroCadastroApi('Erro ao cadastrar. Verifique os dados e tente novamente')
     }
   }

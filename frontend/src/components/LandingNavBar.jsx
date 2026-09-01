@@ -18,9 +18,12 @@ function LandingNavBar() {
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="opcoes-basicas" />
         <Navbar.Collapse id="opcoes-basicas">
-          <Nav className="ms-auto">
+          <Nav className="ms-auto align-items-lg-center">
             <Nav.Link href="#sobre">Sobre</Nav.Link>
-            <Button className="btn-laranja" onClick={() => navigate("/auth")}>
+            <Nav.Link onClick={() => navigate("/auth", { state: { modo: "login" } })}>
+              Entrar
+            </Nav.Link>
+            <Button className="btn-laranja" onClick={() => navigate("/auth", { state: { modo: "cadastro" } })}>
               Comece já
             </Button>
           </Nav>

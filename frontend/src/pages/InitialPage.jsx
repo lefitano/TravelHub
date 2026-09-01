@@ -18,7 +18,7 @@ export default function InitialPage() {
             <span className="logo-gradiente">TravelHub</span>
           </h1>
           <p>Seu organizador de Viagens e Eventos</p>
-          <Button className="btn-laranja" onClick={() => navigate("/auth")}>
+          <Button className="btn-laranja" onClick={() => navigate("/auth", { state: { modo: "cadastro" } })}>
             Comece já
           </Button>
         </Container>
