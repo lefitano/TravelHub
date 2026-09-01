@@ -3,10 +3,17 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Button from "react-bootstrap/Button";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 
 function AuthNavBar({onCadastrar}) {
   const navigate = useNavigate();
+  const { token } = useAuth();
+
+  function handleLogoClick(){
+    navigate(token ? '/dashboard' : '/');
+  }
+
   return (
     <Navbar
       expand="lg"
@@ -14,7 +21,7 @@ function AuthNavBar({onCadastrar}) {
       style={{ backgroundColor: "var(--cor-navbar-footer)" }}
     >
       <Container>
-        <Navbar.Brand onClick={() => navigate('/')} style={{cursor: 'pointer'}} className="logo-gradiente">
+        <Navbar.Brand onClick={handleLogoClick} style={{cursor: 'pointer'}} className="logo-gradiente">
           TravelHub
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="opcoes-basicas" />
