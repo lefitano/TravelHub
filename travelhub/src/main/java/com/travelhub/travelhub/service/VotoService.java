@@ -36,7 +36,7 @@ public class VotoService {
             .findFirst()
             .orElseThrow(() -> new RuntimeException("Usuário não participa desse evento"));
 
-        // toggle: cada participante pode votar em quantas opções quiser dentro da mesma votação
+      
         Optional<Voto> votoExistente = votoRepository
             .findByParticipante_IdAndOpcaoVoto_Id(participante.getId(), opcaoVotoId);
 

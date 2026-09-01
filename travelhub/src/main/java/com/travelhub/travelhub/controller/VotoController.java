@@ -49,7 +49,7 @@ public class VotoController {
         }
 
         try {
-            // toggle: se o participante já tinha votado nessa opção, o voto é removido
+            
             votoService.votar(dto.getOpcaoVotoId(), email);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
