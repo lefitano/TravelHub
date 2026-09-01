@@ -9,6 +9,7 @@ import com.travelhub.travelhub.model.Voto;
 
 public interface VotoRepository extends JpaRepository<Voto, Long> {
     Optional<Voto> findByParticipante_IdAndOpcaoVoto_Id(Long participanteId, Long opcaoVotoId);
+    List<Voto> findByParticipante_Id(Long participanteId);
     List<Voto> findByOpcaoVoto_Votacao_Id(Long votacaoId);
     List<Voto> findByOpcaoVoto_Id(Long opcaoVotoId);
 }

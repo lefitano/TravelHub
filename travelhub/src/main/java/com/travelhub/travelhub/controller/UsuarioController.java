@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.travelhub.travelhub.dto.AtualizarPerfilDTO;
+import com.travelhub.travelhub.dto.CadastroUsuarioDTO;
 import com.travelhub.travelhub.dto.UsuarioResponseDTO;
 import com.travelhub.travelhub.model.Usuario;
 import com.travelhub.travelhub.service.UsuarioService;
@@ -41,9 +42,9 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @PostMapping
-    public ResponseEntity<UsuarioResponseDTO> criar( @Valid @RequestBody Usuario usuario){
+    public ResponseEntity<UsuarioResponseDTO> criar( @Valid @RequestBody CadastroUsuarioDTO cadastroDto){
         try{
-        Usuario salvo = usuarioService.salvar(usuario);
+        Usuario salvo = usuarioService.salvar(cadastroDto);
         UsuarioResponseDTO dto = new UsuarioResponseDTO(salvo.getId(), salvo.getNome(), salvo.getEmail(), salvo.getDataCadastro(), salvo.getFotoUrl());
         return ResponseEntity.status(201).body(dto);
         } catch (DataIntegrityViolationException e){
@@ -107,6 +108,8 @@ public class UsuarioController {
         try{
             usuarioService.deletar(id);
             return ResponseEntity.noContent().build();
+        } catch (IllegalStateException e){
+            return ResponseEntity.status(409).build();
         } catch (RuntimeException e){
             return ResponseEntity.notFound().build();
         }

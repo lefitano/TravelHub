@@ -1,6 +1,7 @@
 package com.travelhub.travelhub.service;
 
 import com.travelhub.travelhub.repository.DespesaRepository;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,6 +16,7 @@ import com.travelhub.travelhub.repository.VotacaoRepository;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import com.travelhub.travelhub.dto.CriarEventoDTO;
 import com.travelhub.travelhub.model.Evento;
 import com.travelhub.travelhub.model.Participante;
 import com.travelhub.travelhub.model.StatusPagamento;
@@ -42,10 +44,22 @@ public class EventoService {
     }
 
 
-    public Evento salvar(Evento evento, String emailCriador) {
+    // recebe um DTO sem "id" (em vez da entidade Evento direto) — mesmo motivo do
+    // UsuarioService.salvar: evita que um client sobrescreva um evento existente
+    // de outra pessoa passando o id dele no corpo da requisição (mass assignment)
+    public Evento salvar(CriarEventoDTO dto, String emailCriador) {
+      validarDatas(dto.getDataInicio(), dto.getDataFim());
+
       Usuario criador = usuarioRepository.findByEmail(emailCriador)
         .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
+      Evento evento = new Evento();
+      evento.setNome(dto.getNome());
+      evento.setDescricao(dto.getDescricao());
+      evento.setDestino(dto.getDestino());
+      evento.setDataInicio(dto.getDataInicio());
+      evento.setDataFim(dto.getDataFim());
+      evento.setTipo(dto.getTipo());
       evento.setCriador(criador);
       Evento eventoSalvo = eventoRepository.save(evento);
 
@@ -63,6 +77,7 @@ public class EventoService {
     }
 
     public Evento atualizar(Long id, Evento eventoAtualizado) {
+        validarDatas(eventoAtualizado.getDataInicio(), eventoAtualizado.getDataFim());
 
         return eventoRepository.findById(id)
                 .map(evento -> {
@@ -75,6 +90,12 @@ public class EventoService {
                     return eventoRepository.save(evento);
                 })
                 .orElseThrow(() -> new RuntimeException("Evento não encontrado"));
+    }
+
+    private void validarDatas(LocalDate dataInicio, LocalDate dataFim) {
+        if (dataInicio != null && dataFim != null && dataFim.isBefore(dataInicio)) {
+            throw new IllegalArgumentException("A data final não pode ser anterior à data de início");
+        }
     }
 @Transactional
     public void deletar(Long id) {

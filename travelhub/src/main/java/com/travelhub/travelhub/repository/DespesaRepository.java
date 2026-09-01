@@ -11,5 +11,6 @@ import com.travelhub.travelhub.model.Despesa;
 public interface DespesaRepository extends JpaRepository<Despesa, Long> {
 
     List<Despesa> findByEventoId(Long eventoId);
-    
+    List<Despesa> findByParticipantes_Id(Long participanteId);
+
 }

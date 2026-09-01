@@ -43,6 +43,8 @@ public class ParticipanteController {
         try {
             Participante salvo = participanteService.adicionarPorEmail(dto);
             return ResponseEntity.status(201).body(salvo);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(409).build();
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).build();
         }
@@ -68,7 +70,13 @@ public class ParticipanteController {
         if (participanteAtualOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        if (!eventoService.usuarioParticipa(participanteAtualOpt.get().getEvento().getId(), email)) {
+        Participante participanteAtual = participanteAtualOpt.get();
+        // só o próprio participante ou o criador do evento pode alterar o status de
+        // pagamento — antes, qualquer participante do evento podia marcar o de outro
+        boolean ehOProprio = participanteAtual.getUsuario().getEmail().equals(email);
+        boolean ehCriadorDoEvento = participanteAtual.getEvento().getCriador() != null
+                && participanteAtual.getEvento().getCriador().getEmail().equals(email);
+        if (!ehOProprio && !ehCriadorDoEvento) {
             return ResponseEntity.status(403).build();
         }
         try {
