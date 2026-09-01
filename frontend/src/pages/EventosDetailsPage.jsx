@@ -5,7 +5,7 @@ import api from "../services/api"
 import NavBar from "../components/NavBar";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/esm/Container";
-import { BsArrowLeft, BsGeoAlt, BsHourglassSplit, BsPeople, BsWallet2, BsPersonCircle, BsSuitcaseLg, BsGeoAltFill } from "react-icons/bs"
+import { BsArrowLeft, BsGeoAlt, BsHourglassSplit, BsPeople, BsWallet2, BsPersonCircle, BsSuitcaseLg, BsGeoAltFill, BsCheck2Square, BsChevronRight } from "react-icons/bs"
 import DestinoAutocomplete from "../components/DestinoAutocomplete"
 
 export default function EventosDetailsPage(){
@@ -32,6 +32,9 @@ export default function EventosDetailsPage(){
     const [dataFimEdit, setDataFimEdit] = useState('')
     const [tipoEdit, setTipoEdit] = useState('VIAGEM')
     const [erroEditarEvento, setErroEditarEvento] = useState('')
+    const [votacoes, setVotacoes] = useState([])
+    const [tituloVotacao, setTituloVotacao] = useState('')
+    const [erroVotacao, setErroVotacao] = useState('')
 
     const diasRestantes = evento
         ? Math.ceil((new Date(evento.dataInicio) - new Date()) / (1000 * 60 * 60 * 24))
@@ -41,12 +44,13 @@ export default function EventosDetailsPage(){
     useEffect(() => {
         async function carregarDados(){
             try{
-                const[resEvento, resParticipantes, resDespesas, resDivisao,resUsuario] = await Promise.all([
+                const[resEvento, resParticipantes, resDespesas, resDivisao,resUsuario, resVotacoes] = await Promise.all([
                     api.get(`/eventos/${id}`),
                     api.get(`/participantes/evento/${id}`),
                     api.get(`/despesas/evento/${id}`),
                     api.get(`/despesas/divisao/${id}`),
-                    api.get(`/usuarios/me`)
+                    api.get(`/usuarios/me`),
+                    api.get(`/votacoes/evento/${id}`)
                 ])
               setEvento(resEvento.data)
               setParticipantes(resParticipantes.data)
@@ -54,6 +58,7 @@ export default function EventosDetailsPage(){
               setDespesas(resDespesas.data)
               setDivisaoPorPessoa(resDivisao.data)
               setUsuarioLogado(resUsuario.data)
+              setVotacoes(resVotacoes.data)
             } catch{
                 setErro("Não foi possível carregar os dados do evento")
             }
@@ -121,6 +126,31 @@ export default function EventosDetailsPage(){
             setDivisaoPorPessoa(resDivisao.data)
         }catch{
             setErroDespesa("Não foi possível remover a despesa")
+        }
+    }
+
+    async function handleAdicionarVotacao(e){
+        e.preventDefault()
+        setErroVotacao('')
+        try{
+            await api.post('/votacoes', { titulo: tituloVotacao, evento: { id: Number(id) } })
+            setTituloVotacao('')
+            const res = await api.get(`/votacoes/evento/${id}`)
+            setVotacoes(res.data)
+        }catch{
+            setErroVotacao("Não foi possível criar a votação")
+        }
+    }
+
+    async function handleRemoverVotacao(votacaoId){
+        if(!window.confirm("Tem certeza que deseja excluir essa votação? Essa ação não pode ser desfeita.")){
+            return
+        }
+        try{
+            await api.delete(`/votacoes/${votacaoId}`)
+            setVotacoes(prev => prev.filter(v => v.id !== votacaoId))
+        }catch{
+            setErroVotacao("Não foi possível excluir a votação")
         }
     }
 
@@ -497,8 +527,60 @@ export default function EventosDetailsPage(){
                 )}
             </div>
 
+            <div style={{ marginBottom: "2rem" }}>
+                <h5 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, marginBottom: "1rem",
+                    display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                    <BsCheck2Square style={{ color: "#ff6b35" }} />
+                    Votações
+                </h5>
+
+                {votacoes.length === 0 && (
+                    <p style={{ color: "#6b7280", fontSize: "0.9rem" }}>Nenhuma votação criada ainda.</p>
+                )}
+
+                {votacoes.map(v => (
+                    <div key={v.id} onClick={() => navigate(`/eventos/${id}/votacoes/${v.id}`)}
+                        style={{ display: "flex", justifyContent: "space-between",
+                        alignItems: "center", padding: "0.75rem 1rem", marginBottom: "0.5rem",
+                        backgroundColor: "#ffffff", border: "1px solid #e5e7eb",
+                        borderRadius: "8px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)", cursor: "pointer" }}>
+                        <p style={{ margin: 0, fontWeight: 600, fontSize: "0.95rem" }}>{v.titulo}</p>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                            {evento?.criador?.email === usuarioLogado?.email && (
+                                <button onClick={e => { e.stopPropagation(); handleRemoverVotacao(v.id) }}
+                                    style={{ background: "none", border: "none", color: "#6b7280",
+                                        cursor: "pointer", fontSize: "1.1rem", lineHeight: 1 }}>
+                                    ×
+                                </button>
+                            )}
+                            <BsChevronRight style={{ color: "#6b7280" }} />
+                        </div>
+                    </div>
+                ))}
+
+                {evento?.criador?.email === usuarioLogado?.email && (
+                    <form onSubmit={handleAdicionarVotacao}
+                        style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
+                        <input
+                            type="text"
+                            placeholder="Título da votação (ex: Onde vamos jantar?)"
+                            value={tituloVotacao}
+                            onChange={e => setTituloVotacao(e.target.value)}
+                            required
+                            style={{ flex: 1, padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
+                                borderRadius: "8px", fontSize: "0.9rem", outline: "none" }}
+                        />
+                        <Button className="btn-laranja" type="submit">Criar</Button>
+                    </form>
+                )}
+
+                {erroVotacao && (
+                    <p style={{ color: "red", fontSize: "0.85rem", marginTop: "0.5rem" }}>{erroVotacao}</p>
+                )}
+            </div>
+
         </Container>
-       
+
         </>
     )
 }
