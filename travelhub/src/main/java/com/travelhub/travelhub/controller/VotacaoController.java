@@ -15,10 +15,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.travelhub.travelhub.dto.CriarVotacaoDTO;
 import com.travelhub.travelhub.model.Evento;
 import com.travelhub.travelhub.model.Votacao;
 import com.travelhub.travelhub.service.EventoService;
 import com.travelhub.travelhub.service.VotacaoService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/votacoes")
@@ -30,12 +33,9 @@ public class VotacaoController {
     private EventoService eventoService;
 
     @PostMapping
-    public ResponseEntity<Votacao> criar(@RequestBody Votacao votacao) {
+    public ResponseEntity<Votacao> criar(@Valid @RequestBody CriarVotacaoDTO dto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (votacao.getEvento() == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        Optional<Evento> eventoOpt = eventoService.buscarPorId(votacao.getEvento().getId());
+        Optional<Evento> eventoOpt = eventoService.buscarPorId(dto.getEventoId());
         if (eventoOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -44,7 +44,7 @@ public class VotacaoController {
         if (!ehCriador) {
             return ResponseEntity.status(403).build();
         }
-        Votacao salva = votacaoService.salvar(votacao);
+        Votacao salva = votacaoService.salvar(dto, eventoOpt.get());
         return ResponseEntity.status(201).body(salva);
     }
 
@@ -71,7 +71,7 @@ public class VotacaoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Votacao> atualizar(@PathVariable Long id, @RequestBody Votacao votacao) {
+    public ResponseEntity<Votacao> atualizar(@PathVariable Long id, @Valid @RequestBody Votacao votacao) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<Votacao> votacaoAtualOpt = votacaoService.buscarPorId(id);
         if (votacaoAtualOpt.isEmpty()) {

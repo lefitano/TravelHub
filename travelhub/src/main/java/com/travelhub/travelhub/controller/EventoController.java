@@ -18,6 +18,7 @@ import com.travelhub.travelhub.service.EventoService;
 
 import jakarta.validation.Valid;
 
+import com.travelhub.travelhub.dto.CriarEventoDTO;
 import com.travelhub.travelhub.model.Evento;
 
 @RestController
@@ -27,10 +28,14 @@ public class EventoController {
     private EventoService eventoService;
 
     @PostMapping
-    public ResponseEntity<Evento> salvar(@Valid @RequestBody Evento evento) {
+    public ResponseEntity<Evento> salvar(@Valid @RequestBody CriarEventoDTO dto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Evento eventoSalvo = eventoService.salvar(evento, email);
-        return ResponseEntity.status(201).body(eventoSalvo);
+        try {
+            Evento eventoSalvo = eventoService.salvar(dto, email);
+            return ResponseEntity.status(201).body(eventoSalvo);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("/meus")
@@ -65,7 +70,9 @@ public class EventoController {
         try {
             Evento atualizado = eventoService.atualizar(id, evento);
             return ResponseEntity.ok(atualizado);
-        }catch (RuntimeException e){
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (RuntimeException e){
             return ResponseEntity.notFound().build();
         }
     }

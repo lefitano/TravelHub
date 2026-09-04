@@ -15,11 +15,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.travelhub.travelhub.dto.CriarOpcaoVotoDTO;
 import com.travelhub.travelhub.model.OpcaoVoto;
 import com.travelhub.travelhub.model.Votacao;
 import com.travelhub.travelhub.service.EventoService;
 import com.travelhub.travelhub.service.OpcaoVotoService;
 import com.travelhub.travelhub.service.VotacaoService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/opcoesvotos")
@@ -32,13 +35,9 @@ public class OpcaoVotoController {
     private EventoService eventoService;
 
     @PostMapping
-    public ResponseEntity<OpcaoVoto> salvar(@RequestBody OpcaoVoto opcaoVoto) {
+    public ResponseEntity<OpcaoVoto> salvar(@Valid @RequestBody CriarOpcaoVotoDTO dto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (opcaoVoto.getVotacao() == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        // o JSON só manda o id da votação, então buscamos a votação completa (com o evento) no banco
-        Optional<Votacao> votacaoOpt = votacaoService.buscarPorId(opcaoVoto.getVotacao().getId());
+        Optional<Votacao> votacaoOpt = votacaoService.buscarPorId(dto.getVotacaoId());
         if (votacaoOpt.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
@@ -47,7 +46,7 @@ public class OpcaoVotoController {
         if (!ehCriador) {
             return ResponseEntity.status(403).build();
         }
-        OpcaoVoto salvo = opcaoVotoService.salvar(opcaoVoto);
+        OpcaoVoto salvo = opcaoVotoService.salvar(dto, votacaoOpt.get());
         return ResponseEntity.status(201).body(salvo);
     }
 
@@ -78,7 +77,7 @@ public class OpcaoVotoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OpcaoVoto> atualizar(@PathVariable Long id, @RequestBody OpcaoVoto opcaoVoto) {
+    public ResponseEntity<OpcaoVoto> atualizar(@PathVariable Long id, @Valid @RequestBody OpcaoVoto opcaoVoto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<OpcaoVoto> opcaoVotoAtualOpt = opcaoVotoService.buscarPorId(id);
         if (opcaoVotoAtualOpt.isEmpty()) {

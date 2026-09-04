@@ -60,7 +60,7 @@ export default function VotacaoDetailsPage(){
         e.preventDefault()
         setErroOpcao('')
         try{
-            await api.post('/opcoesvotos', { descricao: descricaoOpcao, votacao: { id: Number(votacaoId) } })
+            await api.post('/opcoesvotos', { descricao: descricaoOpcao, votacaoId: Number(votacaoId) })
             setDescricaoOpcao('')
             const res = await api.get(`/opcoesvotos/votacao/${votacaoId}`)
             setOpcoes(res.data)
