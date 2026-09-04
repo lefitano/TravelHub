@@ -15,15 +15,9 @@ export default function EventosDetailsPage(){
     const[evento, setEvento] = useState(null)
     const[participantes, setParticipantes] = useState([])
     const[despesas, setDespesas] = useState([])
-    const[divisaoPorPessoa, setDivisaoPorPessoa] = useState(null)
+    const[votacoes, setVotacoes] = useState([])
     const[erro, setErro] = useState('')
-    const [emailConvidar, setEmailConvidar] = useState('')
-    const [erroParticipante, setErroParticipante] = useState('')
-    const [descricaoDespesa, setDescricaoDespesa] = useState('')
-    const [valorDespesa, setValorDespesa] = useState('')
-    const [erroDespesa, setErroDespesa] = useState('')
     const [usuarioLogado, setUsuarioLogado] = useState(null)
-    const [participantesSelecionados, setParticipantesSelecionados] = useState([])
     const [mostrarEditarEvento, setMostrarEditarEvento] = useState(false)
     const [nomeEdit, setNomeEdit] = useState('')
     const [descricaoEdit, setDescricaoEdit] = useState('')
@@ -32,9 +26,6 @@ export default function EventosDetailsPage(){
     const [dataFimEdit, setDataFimEdit] = useState('')
     const [tipoEdit, setTipoEdit] = useState('VIAGEM')
     const [erroEditarEvento, setErroEditarEvento] = useState('')
-    const [votacoes, setVotacoes] = useState([])
-    const [tituloVotacao, setTituloVotacao] = useState('')
-    const [erroVotacao, setErroVotacao] = useState('')
 
     const diasRestantes = evento
         ? Math.ceil((new Date(evento.dataInicio) - new Date()) / (1000 * 60 * 60 * 24))
@@ -44,19 +35,16 @@ export default function EventosDetailsPage(){
     useEffect(() => {
         async function carregarDados(){
             try{
-                const[resEvento, resParticipantes, resDespesas, resDivisao,resUsuario, resVotacoes] = await Promise.all([
+                const[resEvento, resParticipantes, resDespesas, resUsuario, resVotacoes] = await Promise.all([
                     api.get(`/eventos/${id}`),
                     api.get(`/participantes/evento/${id}`),
                     api.get(`/despesas/evento/${id}`),
-                    api.get(`/despesas/divisao/${id}`),
                     api.get(`/usuarios/me`),
                     api.get(`/votacoes/evento/${id}`)
                 ])
               setEvento(resEvento.data)
               setParticipantes(resParticipantes.data)
-              setParticipantesSelecionados(resParticipantes.data.map(p => p.id))
               setDespesas(resDespesas.data)
-              setDivisaoPorPessoa(resDivisao.data)
               setUsuarioLogado(resUsuario.data)
               setVotacoes(resVotacoes.data)
             } catch{
@@ -65,94 +53,6 @@ export default function EventosDetailsPage(){
         }
         carregarDados()
     }, [id])
-
-    async function handleAdicionarParticipante(e){
-        e.preventDefault()
-        setErroParticipante('')
-        try{
-            await api.post('/participantes', {email: emailConvidar, eventoId: Number(id)})
-            setEmailConvidar('')
-            const res = await api.get(`/participantes/evento/${id}`)
-            setParticipantes(res.data)
-            setParticipantesSelecionados(res.data.map(p => p.id))
-        }catch{
-            setErroParticipante("Usuário não encontrado ou já participando")
-        }
-    }
-    async function handleRemoverParticipante(participanteId){
-        try{
-            await api.delete(`/participantes/${participanteId}`)
-            setParticipantes(prev => prev.filter(p => p.id !== participanteId))
-            setParticipantesSelecionados(prev => prev.filter(pid => pid !== participanteId))
-        }catch{
-            setErroParticipante("Não foi possível remover o participante")
-        }
-    }
-    function handleToggleParticipanteDespesa(participanteId){
-        setParticipantesSelecionados(prev =>
-            prev.includes(participanteId)
-                ? prev.filter(pid => pid !== participanteId)
-                : [...prev, participanteId]
-        )
-    }
-
-    async function handleAdicionarDespesa(e){
-        e.preventDefault()
-        setErroDespesa('')
-        try{
-            await api.post('/despesas', {
-                descricao: descricaoDespesa,
-                valor: Number(valorDespesa),
-                eventoId: Number(id),
-                participantesIds: participantesSelecionados
-            })
-            setDescricaoDespesa('')
-            setValorDespesa('')
-            setParticipantesSelecionados(participantes.map(p => p.id))
-            const res = await api.get(`/despesas/evento/${id}`)
-            setDespesas(res.data)
-            const resDivisao = await api.get(`/despesas/divisao/${id}`)
-            setDivisaoPorPessoa(resDivisao.data)
-        }catch{
-            setErroDespesa('Não foi possível adicionar despesa')
-        }
-    }
-
-    async function handleRemoverDespesa(despesaId){
-        try{
-            await api.delete(`/despesas/${despesaId}`)
-            setDespesas(prev => prev.filter(p => p.id !== despesaId))
-            const resDivisao = await api.get(`/despesas/divisao/${id}`)
-            setDivisaoPorPessoa(resDivisao.data)
-        }catch{
-            setErroDespesa("Não foi possível remover a despesa")
-        }
-    }
-
-    async function handleAdicionarVotacao(e){
-        e.preventDefault()
-        setErroVotacao('')
-        try{
-            await api.post('/votacoes', { titulo: tituloVotacao, eventoId: Number(id) })
-            setTituloVotacao('')
-            const res = await api.get(`/votacoes/evento/${id}`)
-            setVotacoes(res.data)
-        }catch{
-            setErroVotacao("Não foi possível criar a votação")
-        }
-    }
-
-    async function handleRemoverVotacao(votacaoId){
-        if(!window.confirm("Tem certeza que deseja excluir essa votação? Essa ação não pode ser desfeita.")){
-            return
-        }
-        try{
-            await api.delete(`/votacoes/${votacaoId}`)
-            setVotacoes(prev => prev.filter(v => v.id !== votacaoId))
-        }catch{
-            setErroVotacao("Não foi possível excluir a votação")
-        }
-    }
 
     function handleAbrirEdicao(){
         setNomeEdit(evento.nome)
@@ -338,8 +238,9 @@ export default function EventosDetailsPage(){
         <Container className="mt-4">
             {erro && <p style={{ color: "red", fontSize: "0.85rem" }}>{erro}</p>}
             {evento && (
-                <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem" }}>
-                    <div style={{ flex: 1, backgroundColor: "#ffffff", borderRadius: "12px",
+                <>
+                <div style={{ display: "flex", gap: "1rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
+                    <div style={{ flex: "1 1 140px", backgroundColor: "#ffffff", borderRadius: "12px",
                         padding: "1.25rem 1.5rem", border: "1px solid #e5e7eb",
                         borderTop: "3px solid #ff6b35", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
                         <BsHourglassSplit size={18} style={{ color: "#ff6b35", marginBottom: "0.5rem" }} />
@@ -353,9 +254,11 @@ export default function EventosDetailsPage(){
                         <p style={{ margin: "0.4rem 0 0", color: "#6b7280", fontSize: "0.72rem",
                             textTransform: "uppercase", letterSpacing: "0.08em" }}>Dias restantes</p>
                     </div>
-                    <div style={{ flex: 1, backgroundColor: "#ffffff", borderRadius: "12px",
+                    <div onClick={() => navigate(`/eventos/${id}/participantes`)}
+                        style={{ flex: "1 1 140px", backgroundColor: "#ffffff", borderRadius: "12px",
                         padding: "1.25rem 1.5rem", border: "1px solid #e5e7eb",
-                        borderTop: "3px solid #ff6b35", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
+                        borderTop: "3px solid #ff6b35", boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                        cursor: "pointer" }}>
                         <BsPeople size={18} style={{ color: "#ff6b35", marginBottom: "0.5rem" }} />
                         <p style={{ margin: 0, fontSize: "2rem", fontWeight: 800, lineHeight: 1,
                             fontFamily: "Raleway, sans-serif",
@@ -368,7 +271,7 @@ export default function EventosDetailsPage(){
                             textTransform: "uppercase", letterSpacing: "0.08em" }}>Participantes</p>
                     </div>
                     <div onClick={() => navigate(`/eventos/${id}/despesas`)}
-                        style={{ flex: 1, backgroundColor: "#ffffff", borderRadius: "12px",
+                        style={{ flex: "1 1 140px", backgroundColor: "#ffffff", borderRadius: "12px",
                         padding: "1.25rem 1.5rem", border: "1px solid #e5e7eb",
                         borderTop: "3px solid #ff6b35", boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
                         cursor: "pointer" }}>
@@ -381,206 +284,69 @@ export default function EventosDetailsPage(){
                             R$ {totalDespesas.toFixed(2)}
                         </p>
                         <p style={{ margin: "0.4rem 0 0", color: "#6b7280", fontSize: "0.72rem",
-                            textTransform: "uppercase", letterSpacing: "0.08em" }}>Total despesas</p>
+                            textTransform: "uppercase", letterSpacing: "0.08em" }}>Despesas</p>
+                    </div>
+                    <div onClick={() => navigate(`/eventos/${id}/votacoes`)}
+                        style={{ flex: "1 1 140px", backgroundColor: "#ffffff", borderRadius: "12px",
+                        padding: "1.25rem 1.5rem", border: "1px solid #e5e7eb",
+                        borderTop: "3px solid #ff6b35", boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                        cursor: "pointer" }}>
+                        <BsCheck2Square size={18} style={{ color: "#ff6b35", marginBottom: "0.5rem" }} />
+                        <p style={{ margin: 0, fontSize: "2rem", fontWeight: 800, lineHeight: 1,
+                            fontFamily: "Raleway, sans-serif",
+                            background: "linear-gradient(135deg, #ff6b35, #ffab6b)",
+                            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                            backgroundClip: "text" }}>
+                            {votacoes.length}
+                        </p>
+                        <p style={{ margin: "0.4rem 0 0", color: "#6b7280", fontSize: "0.72rem",
+                            textTransform: "uppercase", letterSpacing: "0.08em" }}>Votações</p>
                     </div>
                 </div>
-            )}
 
-            
-            <div style={{ marginBottom: "2rem" }}>
-                <h5 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, marginBottom: "1rem" }}>
-                    Participantes
-                </h5>
-
-                {participantes.map(p => (
-                    <div key={p.id} style={{ display: "flex", justifyContent: "space-between",
-                        alignItems: "center", padding: "0.75rem 1rem", marginBottom: "0.5rem",
-                        backgroundColor: "#ffffff", border: "1px solid #e5e7eb",
-                        borderRadius: "8px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                            {p.usuario.fotoUrl ? (
-                                <img
-                                    src={`${api.defaults.baseURL}${p.usuario.fotoUrl}`}
-                                    alt={p.usuario.nome}
-                                    style={{ width: "36px", height: "36px", borderRadius: "50%",
-                                        objectFit: "cover", flexShrink: 0 }}
-                                />
-                            ) : (
-                                <div style={{ width: "36px", height: "36px", borderRadius: "50%",
-                                    backgroundColor: "#f5f5f5", display: "flex", alignItems: "center",
-                                    justifyContent: "center", flexShrink: 0 }}>
-                                    <BsPersonCircle size={22} style={{ color: "#ff6b35" }} />
+                {participantes.length > 0 && (
+                    <div onClick={() => navigate(`/eventos/${id}/participantes`)}
+                        style={{ display: "flex", alignItems: "center", gap: "0.6rem",
+                        cursor: "pointer", marginBottom: "0.5rem" }}>
+                        <div style={{ display: "flex" }}>
+                            {participantes.slice(0, 5).map(p => (
+                                p.usuario.fotoUrl ? (
+                                    <img key={p.id}
+                                        src={`${api.defaults.baseURL}${p.usuario.fotoUrl}`}
+                                        alt={p.usuario.nome}
+                                        title={p.usuario.nome}
+                                        style={{ width: "32px", height: "32px", borderRadius: "50%",
+                                            objectFit: "cover", border: "2px solid #ffffff",
+                                            marginLeft: "-8px", flexShrink: 0 }}
+                                    />
+                                ) : (
+                                    <div key={p.id} title={p.usuario.nome}
+                                        style={{ width: "32px", height: "32px", borderRadius: "50%",
+                                        backgroundColor: "#f5f5f5", border: "2px solid #ffffff",
+                                        display: "flex", alignItems: "center", justifyContent: "center",
+                                        marginLeft: "-8px", flexShrink: 0 }}>
+                                        <BsPersonCircle size={18} style={{ color: "#ff6b35" }} />
+                                    </div>
+                                )
+                            ))}
+                            {participantes.length > 5 && (
+                                <div style={{ width: "32px", height: "32px", borderRadius: "50%",
+                                    backgroundColor: "#2a2a2a", border: "2px solid #ffffff",
+                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                    marginLeft: "-8px", flexShrink: 0, color: "#ffffff",
+                                    fontSize: "0.7rem", fontWeight: 700 }}>
+                                    +{participantes.length - 5}
                                 </div>
                             )}
-                            <div>
-                                <p style={{ margin: 0, fontWeight: 600, fontSize: "0.95rem" }}>{p.usuario.nome}</p>
-                                <p style={{ margin: 0, color: "#6b7280", fontSize: "0.8rem" }}>{p.usuario.email}</p>
-                            </div>
                         </div>
-                        {(p.usuario.email === usuarioLogado?.email || evento?.criador?.email === usuarioLogado?.email) && (
-                        <button onClick={() => handleRemoverParticipante(p.id)}
-                            style={{ background: "none", border: "none", color: "#6b7280",
-                                cursor: "pointer", fontSize: "1.1rem", lineHeight: 1 }}>
-                            ×
-                        </button>
-                        )}
+                        <span style={{ color: "#6b7280", fontSize: "0.85rem", display: "flex", alignItems: "center" }}>
+                            Ver participantes <BsChevronRight style={{ marginLeft: "0.25rem" }} />
+                        </span>
                     </div>
-                ))}
-
-                <form onSubmit={handleAdicionarParticipante}
-                    style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
-                    <input
-                        type="email"
-                        placeholder="Email do participante"
-                        value={emailConvidar}
-                        onChange={e => setEmailConvidar(e.target.value)}
-                        required
-                        style={{ flex: 1, padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
-                            borderRadius: "8px", fontSize: "0.9rem", outline: "none" }}
-                    />
-                    <Button className="btn-laranja" type="submit">Convidar</Button>
-                </form>
-
-                {erroParticipante && (
-                    <p style={{ color: "red", fontSize: "0.85rem", marginTop: "0.5rem" }}>{erroParticipante}</p>
                 )}
-            </div>
-            <div style={{ marginBottom: "2rem" }}>
-                <h5 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, marginBottom: "1rem" }}>
-                Despesas
-                </h5>
-
-                {despesas.map(d => (
-                    <div key={d.id} style={{ display: "flex", justifyContent: "space-between",
-                        alignItems: "center", padding: "0.75rem 1rem", marginBottom: "0.5rem",
-                        backgroundColor: "#ffffff", border: "1px solid #e5e7eb",
-                        borderRadius: "8px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
-                        <div>
-                            <p style={{ margin: 0, fontWeight: 600, fontSize: "0.95rem" }}>{d.descricao}</p>
-                            <p style={{ margin: 0, color: "#6b7280", fontSize: "0.8rem" }}>
-                                {d.responsavel.nome} · R$ {Number(d.valor).toFixed(2)}
-                            </p>
-                        </div>
-                        {d.responsavel.email === usuarioLogado?.email && (
-                            <button onClick={() => handleRemoverDespesa(d.id)}
-                                style={{ background: "none", border: "none", color: "#6b7280",
-                                    cursor: "pointer", fontSize: "1.1rem", lineHeight: 1 }}>
-                                ×
-                            </button>
-)}
-                    </div>
-                ))}
-
-                <form onSubmit={handleAdicionarDespesa}
-                    style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
-                    <input
-                        type="text"
-                        placeholder="Descrição"
-                        value={descricaoDespesa}
-                        onChange={e => setDescricaoDespesa(e.target.value)}
-                        required
-                        style={{ flex: 1, padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
-                            borderRadius: "8px", fontSize: "0.9rem", outline: "none" }}
-                    />
-                    <input
-                        type="number"
-                        step="0.01"
-                        placeholder="Valor"
-                        value={valorDespesa}
-                        onChange={e => setValorDespesa(e.target.value)}
-                        required
-                        style={{ width: "120px", padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
-                            borderRadius: "8px", fontSize: "0.9rem", outline: "none" }}
-                    />
-                    <Button className="btn-laranja" type="submit">Adicionar</Button>
-                </form>
-
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "0.75rem" }}>
-                    {participantes.map(p => (
-                        <label key={p.id} style={{ display: "flex", alignItems: "center", gap: "0.35rem",
-                            fontSize: "0.85rem", color: "#6b7280", cursor: "pointer" }}>
-                            <input
-                                type="checkbox"
-                                checked={participantesSelecionados.includes(p.id)}
-                                onChange={() => handleToggleParticipanteDespesa(p.id)}
-                            />
-                            {p.usuario.nome}
-                        </label>
-                    ))}
-                </div>
-
-                {erroDespesa && (
-                    <p style={{ color: "red", fontSize: "0.85rem", marginTop: "0.5rem" }}>{erroDespesa}</p>
-                )}
-
-                <p style={{ color: "#6b7280", fontSize: "0.85rem", marginTop: "0.75rem" }}>
-                    Total: R$ {totalDespesas.toFixed(2)}
-                </p>
-                {divisaoPorPessoa && divisaoPorPessoa.length > 0 && (
-                    <ul style={{ margin: "0.25rem 0 0", paddingLeft: "1.1rem", color: "#6b7280", fontSize: "0.85rem" }}>
-                        {divisaoPorPessoa.map(saldo => (
-                            <li key={saldo.participanteId}>
-                                {saldo.nome} deve R$ {Number(saldo.valor).toFixed(2)}
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </div>
-
-            <div style={{ marginBottom: "2rem" }}>
-                <h5 style={{ fontFamily: "Raleway, sans-serif", fontWeight: 700, marginBottom: "1rem",
-                    display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                    <BsCheck2Square style={{ color: "#ff6b35" }} />
-                    Votações
-                </h5>
-
-                {votacoes.length === 0 && (
-                    <p style={{ color: "#6b7280", fontSize: "0.9rem" }}>Nenhuma votação criada ainda.</p>
-                )}
-
-                {votacoes.map(v => (
-                    <div key={v.id} onClick={() => navigate(`/eventos/${id}/votacoes/${v.id}`)}
-                        style={{ display: "flex", justifyContent: "space-between",
-                        alignItems: "center", padding: "0.75rem 1rem", marginBottom: "0.5rem",
-                        backgroundColor: "#ffffff", border: "1px solid #e5e7eb",
-                        borderRadius: "8px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)", cursor: "pointer" }}>
-                        <p style={{ margin: 0, fontWeight: 600, fontSize: "0.95rem" }}>{v.titulo}</p>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                            {evento?.criador?.email === usuarioLogado?.email && (
-                                <button onClick={e => { e.stopPropagation(); handleRemoverVotacao(v.id) }}
-                                    style={{ background: "none", border: "none", color: "#6b7280",
-                                        cursor: "pointer", fontSize: "1.1rem", lineHeight: 1 }}>
-                                    ×
-                                </button>
-                            )}
-                            <BsChevronRight style={{ color: "#6b7280" }} />
-                        </div>
-                    </div>
-                ))}
-
-                {evento?.criador?.email === usuarioLogado?.email && (
-                    <form onSubmit={handleAdicionarVotacao}
-                        style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
-                        <input
-                            type="text"
-                            placeholder="Título da votação (ex: Onde vamos jantar?)"
-                            value={tituloVotacao}
-                            onChange={e => setTituloVotacao(e.target.value)}
-                            required
-                            style={{ flex: 1, padding: "0.5rem 0.75rem", border: "1px solid #e5e7eb",
-                                borderRadius: "8px", fontSize: "0.9rem", outline: "none" }}
-                        />
-                        <Button className="btn-laranja" type="submit">Criar</Button>
-                    </form>
-                )}
-
-                {erroVotacao && (
-                    <p style={{ color: "red", fontSize: "0.85rem", marginTop: "0.5rem" }}>{erroVotacao}</p>
-                )}
-            </div>
-
+                </>
+            )}
         </Container>
-
         </>
     )
 }
