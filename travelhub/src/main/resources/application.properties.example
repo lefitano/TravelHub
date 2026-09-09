@@ -4,10 +4,19 @@ spring.datasource.username=seu_usuario
 spring.datasource.password=sua_senha
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
-spring.jpa.hibernate.ddl-auto=update
+# validate (nao "update"): o Hibernate so confere se as entidades batem com o
+# schema, nunca mais altera o banco sozinho — toda mudanca de schema passa por
+# uma migration do Flyway (src/main/resources/db/migration)
+spring.jpa.hibernate.ddl-auto=validate
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+
+# baseline-on-migrate=true: necessario so se voce ja tinha um banco criado antes
+# do Flyway existir nesse projeto (registra a V1 como "ja aplicada" sem executar).
+# Num banco novo do zero, pode deixar false — a V1 roda normalmente.
+spring.flyway.baseline-on-migrate=true
+spring.flyway.baseline-version=1
 
 server.port=8000
 # stateless (JWT) - nao usamos sessao de servidor, entao nao ha motivo pra persistir sessao em disco
