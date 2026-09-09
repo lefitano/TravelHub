@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 
 import java.util.Optional;
@@ -28,6 +29,8 @@ import com.travelhub.travelhub.model.Usuario;
 
 public class UsuarioService {
     private static final Path DIRETORIO_FOTOS = Paths.get("uploads", "fotos-perfil");
+    private static final SecureRandom GERADOR_TOKEN = new SecureRandom();
+
     @Autowired // anotação para injeção de dependencia
     private UsuarioRepository usuarioRepository; // chamei o repository para acessar o banco
     @Autowired
@@ -36,6 +39,8 @@ public class UsuarioService {
     private EventoRepository eventoRepository;
     @Autowired
     private ParticipanteRepository participanteRepository;
+    @Autowired
+    private EmailService emailService;
 
     // recebe um DTO sem "id" (em vez da entidade Usuario direto) — se aceitássemos
     // a entidade, um client poderia mandar um id de usuário existente e o Spring
@@ -46,7 +51,15 @@ public class UsuarioService {
         usuario.setEmail(dto.getEmail());
         usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
         usuario.setDataCadastro(LocalDateTime.now());
-        return usuarioRepository.save(usuario);
+
+        usuario.setEmailVerificado(false);
+        String token = gerarTokenAleatorio();
+        usuario.setTokenVerificacaoEmail(token);
+        usuario.setTokenVerificacaoExpiracao(LocalDateTime.now().plusHours(24));
+
+        Usuario salvo = usuarioRepository.save(usuario);
+        emailService.enviarEmailVerificacao(salvo.getEmail(), token);
+        return salvo;
     }
 
     public Optional<Usuario> buscarPorId(Long id) {
@@ -94,6 +107,77 @@ public class UsuarioService {
             usuario.setSenha(passwordEncoder.encode(dto.getNovaSenha()));
             usuarioRepository.save(usuario);
 
+    }
+
+    public void solicitarRecuperacaoSenha(String email) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
+        if (usuarioOpt.isEmpty()) {
+            // não revela se o email existe ou não — evita dar essa informação
+            // pra quem só está tentando descobrir emails cadastrados
+            return;
+        }
+
+        Usuario usuario = usuarioOpt.get();
+        String token = gerarTokenAleatorio();
+
+        usuario.setTokenRecuperacaoSenha(token);
+        usuario.setTokenRecuperacaoExpiracao(LocalDateTime.now().plusHours(1));
+        usuarioRepository.save(usuario);
+
+        emailService.enviarEmailRecuperacaoSenha(usuario.getEmail(), token);
+    }
+
+    public void redefinirSenha(String token, String novaSenha) {
+        Usuario usuario = usuarioRepository.findByTokenRecuperacaoSenha(token)
+            .orElseThrow(() -> new IllegalArgumentException("Link de redefinição inválido ou já utilizado"));
+
+        if (usuario.getTokenRecuperacaoExpiracao() == null
+                || usuario.getTokenRecuperacaoExpiracao().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Link de redefinição expirado, peça um novo");
+        }
+
+        usuario.setSenha(passwordEncoder.encode(novaSenha));
+        usuario.setTokenRecuperacaoSenha(null);
+        usuario.setTokenRecuperacaoExpiracao(null);
+        usuarioRepository.save(usuario);
+    }
+
+    public void confirmarEmail(String token) {
+        Usuario usuario = usuarioRepository.findByTokenVerificacaoEmail(token)
+            .orElseThrow(() -> new IllegalArgumentException("Link de confirmação inválido ou já utilizado"));
+
+        if (usuario.getTokenVerificacaoExpiracao() == null
+                || usuario.getTokenVerificacaoExpiracao().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Link de confirmação expirado, peça um novo");
+        }
+
+        usuario.setEmailVerificado(true);
+        usuario.setTokenVerificacaoEmail(null);
+        usuario.setTokenVerificacaoExpiracao(null);
+        usuarioRepository.save(usuario);
+    }
+
+    public void reenviarVerificacao(String email) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
+        // mesma lógica de não revelar existência do email, e não reenvia se já
+        // está verificado (Boolean.TRUE.equals cobre tanto null quanto false)
+        if (usuarioOpt.isEmpty() || Boolean.TRUE.equals(usuarioOpt.get().getEmailVerificado())) {
+            return;
+        }
+
+        Usuario usuario = usuarioOpt.get();
+        String token = gerarTokenAleatorio();
+        usuario.setTokenVerificacaoEmail(token);
+        usuario.setTokenVerificacaoExpiracao(LocalDateTime.now().plusHours(24));
+        usuarioRepository.save(usuario);
+
+        emailService.enviarEmailVerificacao(usuario.getEmail(), token);
+    }
+
+    private String gerarTokenAleatorio() {
+        byte[] bytesAleatorios = new byte[32];
+        GERADOR_TOKEN.nextBytes(bytesAleatorios);
+        return java.util.HexFormat.of().formatHex(bytesAleatorios);
     }
 
     public Usuario salvarFoto(Long id, MultipartFile foto) throws IOException {

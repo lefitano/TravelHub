@@ -1,6 +1,7 @@
 package com.travelhub.travelhub.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -26,6 +27,12 @@ import com.travelhub.travelhub.security.JwtFilter;
 public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
+
+    // lista de origens permitidas por CORS, separadas por vírgula — em dev local
+    // fica só o Vite (5173); em produção, aponta pra URL real do frontend publicado
+    @Value("${app.cors.allowed-origins:http://localhost:5173}")
+    private String[] allowedOrigins;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -34,7 +41,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(HttpMethod.POST, "/auth/login", "/usuarios").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/auth/login", "/usuarios",
+                            "/auth/esqueci-senha", "/auth/redefinir-senha",
+                            "/auth/confirmar-email", "/auth/reenviar-verificacao").permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     // foto de perfil precisa ser carregável direto por uma tag <img>, que não manda
                     // header de Authorization — por isso é pública (não é dado sensível)
@@ -57,7 +66,7 @@ public class SecurityConfig {
     @Bean
    public CorsConfigurationSource corsConfigurationSource(){
     CorsConfiguration config = new CorsConfiguration();
-    config.setAllowedOrigins(List.of("http://localhost:5173"));
+    config.setAllowedOrigins(List.of(allowedOrigins));
     config.setAllowedMethods(List.of("GET" , "POST", "PUT", "DELETE", "OPTIONS"));
     config.setAllowedHeaders(List.of("*"));
     config.setAllowCredentials(true);

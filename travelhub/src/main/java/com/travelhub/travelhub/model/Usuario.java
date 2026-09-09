@@ -45,4 +45,20 @@ public class Usuario {
     private String senha;
     private LocalDateTime dataCadastro;
     private String fotoUrl;
+
+    // usados só durante o fluxo de "esqueci minha senha" — nulos no resto do tempo.
+    // um novo pedido de recuperação sobrescreve o token anterior (invalida links antigos)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String tokenRecuperacaoSenha;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private LocalDateTime tokenRecuperacaoExpiracao;
+
+    // nullable de propósito (Boolean, não boolean primitivo): contas criadas antes
+    // dessa feature existir ficam com null no banco, e null é tratado como "verificado"
+    // no login — assim ninguém que já tinha conta fica bloqueado retroativamente
+    private Boolean emailVerificado;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String tokenVerificacaoEmail;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private LocalDateTime tokenVerificacaoExpiracao;
 }

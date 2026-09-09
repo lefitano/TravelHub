@@ -20,3 +20,42 @@ spring.servlet.multipart.max-request-size=5MB
 
 jwt.secret=${JWT_SECRET}
 jwt.expiration=86400000
+
+# origens permitidas por CORS, separadas por virgula. Em producao, trocar pela
+# URL real do frontend publicado (ex: https://travelhub.exemplo.com)
+app.cors.allowed-origins=http://localhost:5173
+
+# URL do frontend publicado — usada para montar o link de redefinicao de senha
+app.frontend-url=http://localhost:5173
+
+# se o login bloqueia usuarios com email nao confirmado (403 "email_nao_verificado").
+# Deixe "true" (padrao) se o app for ficar aberto pro publico geral. Para um grupo
+# pequeno e conhecido (sem provedor de email configurado ainda), pode usar "false"
+# sem problema — o risco que essa trava evita so importa mesmo com estranhos.
+app.auth.exigir-verificacao-email=true
+
+# --- Envio de email: escolha UMA das opcoes abaixo ---
+#
+# Opcao A) Gmail SMTP — bom pra dev local / teste, entrega em caixa de entrada
+# real sem precisar de dominio proprio. GMAIL_APP_PASSWORD e uma "senha de app"
+# gerada em myaccount.google.com/apppasswords (exige verificacao em 2 etapas
+# ativada na conta) — NAO e a senha normal do Gmail.
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=seu_email@gmail.com
+spring.mail.password=${GMAIL_APP_PASSWORD:}
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+app.mail.from=seu_email@gmail.com
+#
+# Opcao B) Resend (https://resend.com) — free tier sem cartao, mas SEM dominio
+# proprio verificado (aba Domains no painel deles) ele so entrega em enderecos
+# sinteticos de teste (@resend.dev), nunca em caixa de entrada real. Use essa
+# opcao quando for pra producao, com um dominio de verdade verificado la.
+# spring.mail.host=smtp.resend.com
+# spring.mail.port=587
+# spring.mail.username=resend
+# spring.mail.password=${RESEND_API_KEY}
+# spring.mail.properties.mail.smtp.auth=true
+# spring.mail.properties.mail.smtp.starttls.enable=true
+# app.mail.from=verificado@seu-dominio.com

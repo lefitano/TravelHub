@@ -26,17 +26,38 @@ export default function AuthPage() {
   const [erroConfirmarSenha, setErroConfirmarSenha] = useState('');
   const [erroCadastroApi, setErroCadastroApi] = useState('');
   const [sucessoCadastro, setSucessoCadastro] = useState('');
+  const [emailEsqueci, setEmailEsqueci] = useState('');
+  const [erroEsqueci, setErroEsqueci] = useState('');
+  const [sucessoEsqueci, setSucessoEsqueci] = useState('');
+  const [emailNaoVerificado, setEmailNaoVerificado] = useState(false);
+  const [reenvioFeito, setReenvioFeito] = useState(false);
 
   async function handleLogin(e){
     e.preventDefault()
     setErro('')
+    setEmailNaoVerificado(false)
+    setReenvioFeito(false)
     try{
       const resposta = await loginService(email,senha)
       login (resposta.data.token, resposta.data.nome)
       navigate('/dashboard')
-    } catch{
-      setErro('Email ou senha incorretos.')
+    } catch(error){
+      if(error.response?.status === 403 && error.response?.data?.erro === 'email_nao_verificado'){
+        setEmailNaoVerificado(true)
+        setErro('Confirme seu email antes de entrar — veja o link que mandamos pra sua caixa de entrada.')
+      }else{
+        setErro('Email ou senha incorretos.')
+      }
     }
+  }
+
+  async function handleReenviarVerificacao(){
+    try{
+      await api.post('/auth/reenviar-verificacao', { email })
+    }catch{
+      // silencioso de propósito — mesmo padrão de não revelar nada sobre o email
+    }
+    setReenvioFeito(true)
   }
   async function handleCadastro(e){
     e.preventDefault();
@@ -46,10 +67,22 @@ export default function AuthPage() {
     setErroCadastroApi('')
     try{
       await api.post('/usuarios' , {nome, email: emailCadastro, senha: senhaCadastro})
-      setSucessoCadastro('Cadastro realizado! Faça seu login.' )
+      setSucessoCadastro('Cadastro realizado! Confira seu email pra confirmar a conta antes de entrar.')
       setModo('login')
     }catch{
       setErroCadastroApi('Erro ao cadastrar. Verifique os dados e tente novamente')
+    }
+  }
+
+  async function handleEsqueciSenha(e){
+    e.preventDefault()
+    setErroEsqueci('')
+    setSucessoEsqueci('')
+    try{
+      await api.post('/auth/esqueci-senha', { email: emailEsqueci })
+      setSucessoEsqueci('Se esse email estiver cadastrado, você vai receber um link de redefinição em instantes.')
+    }catch{
+      setErroEsqueci('Não foi possível enviar o link. Tente novamente.')
     }
   }
 
@@ -94,7 +127,7 @@ export default function AuthPage() {
           <h2 className="auth-titulo">TravelHub</h2>
           <Card className="card-auth">
             <Card.Body>
-              <Form onSubmit={modo === 'login' ? handleLogin: handleCadastro}>
+              <Form onSubmit={modo === 'login' ? handleLogin : modo === 'esqueci' ? handleEsqueciSenha : handleCadastro}>
                 {modo === 'login' ? (
                   <>
                     <Form.Group className="mb-3" controlId="form-email">
@@ -109,16 +142,57 @@ export default function AuthPage() {
                       <Form.Label>Digite sua senha:</Form.Label>
                       <Form.Control type="password" placeholder="Senha" value={senha} onChange={e => setSenha(e.target.value)} />
                     </Form.Group>
-            
+
                     <Button className="btn-laranja w-100" type="submit">
                       Entrar
                     </Button>
                     {erro && <p style={{color: 'red' , fontSize:'0.85rem', textAlign: 'center'}}>{erro}</p>}
+                    {sucessoCadastro && <p style={{color: 'green', fontSize: '0.85rem', textAlign: 'center'}}>{sucessoCadastro}</p>}
+
+                    {emailNaoVerificado && !reenvioFeito && (
+                      <p className="text-center" style={{fontSize:'0.85rem'}}>
+                        <span className="link-cadastro" onClick={handleReenviarVerificacao}>
+                          Reenviar email de confirmação
+                        </span>
+                      </p>
+                    )}
+                    {reenvioFeito && (
+                      <p className="text-center" style={{color: 'green', fontSize:'0.85rem'}}>
+                        Se o email existir, um novo link foi enviado.
+                      </p>
+                    )}
 
                     <p className="text-center mt-3" style={{fontSize:'0.85rem', color:'var(--cor-textos-suaves)'}}>
+                      <span className="link-cadastro" onClick={() => setModo('esqueci')}>
+                        Esqueceu sua senha?
+                      </span>
+                    </p>
+                    <p className="text-center mt-2" style={{fontSize:'0.85rem', color:'var(--cor-textos-suaves)'}}>
                       Não possui cadastro?{' '}
                       <span className="link-cadastro" onClick={() => setModo('cadastro')}>
                         Cadastre-se agora.
+                      </span>
+                    </p>
+                  </>
+                ) : modo === 'esqueci' ? (
+                  <>
+                    <Form.Group className="mb-3" controlId="form-email-esqueci">
+                      <Form.Label>Digite seu email de cadastro:</Form.Label>
+                      <Form.Control type="email" placeholder="Seu email" value={emailEsqueci} onChange={e => setEmailEsqueci(e.target.value)}/>
+                      <Form.Text className="text-muted">
+                        Vamos te mandar um link pra escolher uma nova senha.
+                      </Form.Text>
+                    </Form.Group>
+
+                    <Button className="btn-laranja w-100" type="submit">
+                      Enviar link
+                    </Button>
+                    {erroEsqueci && <p style={{color: 'red', fontSize:'0.85rem', textAlign: 'center'}}>{erroEsqueci}</p>}
+                    {sucessoEsqueci && <p style={{color: 'green', fontSize:'0.85rem', textAlign: 'center'}}>{sucessoEsqueci}</p>}
+
+                    <p className="text-center mt-3" style={{fontSize:'0.85rem', color:'var(--cor-textos-suaves)'}}>
+                      <span className="link-cadastro" onClick={() => setModo('login')}>
+                        Voltar para o login
                       </span>
                     </p>
                   </>
