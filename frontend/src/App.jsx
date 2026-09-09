@@ -4,6 +4,8 @@ import './App.css'
 import ProtectedRoute from './components/ProtectedRoute'
 import InitialPage from './pages/InitialPage'
 import AuthPage from './pages/AuthPage'
+import RedefinirSenhaPage from './pages/RedefinirSenhaPage'
+import ConfirmarEmailPage from './pages/ConfirmarEmailPage'
 import DashBoardPage from './pages/DashboardPage'
 import EventosPage from './pages/EventosPage'
 import EventosDetailsPage from './pages/EventosDetailsPage'
@@ -20,6 +22,8 @@ function App() {
     <Routes>
     <Route path="/" element={<InitialPage />} />
     <Route path="/auth" element={<AuthPage />} />
+    <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
+    <Route path="/confirmar-email" element={<ConfirmarEmailPage />} />
     <Route path="/dashboard" element={<ProtectedRoute><DashBoardPage /></ProtectedRoute>}/>
     <Route path="/eventos" element={<ProtectedRoute><EventosPage /></ProtectedRoute>} />
     <Route path="/eventos/:id" element={<ProtectedRoute><EventosDetailsPage /></ProtectedRoute>}/>
