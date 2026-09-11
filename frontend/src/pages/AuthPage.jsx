@@ -45,6 +45,8 @@ export default function AuthPage() {
       if(error.response?.status === 403 && error.response?.data?.erro === 'email_nao_verificado'){
         setEmailNaoVerificado(true)
         setErro('Confirme seu email antes de entrar — veja o link que mandamos pra sua caixa de entrada.')
+      }else if(error.response?.status === 429){
+        setErro('Muitas tentativas seguidas. Aguarde alguns minutos e tente de novo.')
       }else{
         setErro('Email ou senha incorretos.')
       }

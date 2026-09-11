@@ -23,8 +23,10 @@ import com.travelhub.travelhub.dto.ReenviarVerificacaoDTO;
 import com.travelhub.travelhub.model.Usuario;
 import com.travelhub.travelhub.repository.UsuarioRepository;
 import com.travelhub.travelhub.security.JwtUtil;
+import com.travelhub.travelhub.security.RateLimiterService;
 import com.travelhub.travelhub.service.UsuarioService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
@@ -43,6 +45,9 @@ public class AuthController {
     @Autowired
     private UsuarioService usuarioService;
 
+    @Autowired
+    private RateLimiterService rateLimiterService;
+
     // liga/desliga o bloqueio de login por email não confirmado — pensado pro caso
     // de uso "grupo pequeno de conhecidos", onde esse risco (alguém se cadastrar
     // com o email de outra pessoa) praticamente não existe. Em produção pública de
@@ -50,8 +55,25 @@ public class AuthController {
     @Value("${app.auth.exigir-verificacao-email:true}")
     private boolean exigirVerificacaoEmail;
 
+    private static final long QUINZE_MINUTOS_MS = 15 * 60 * 1000L;
+    private static final long UMA_HORA_MS = 60 * 60 * 1000L;
+
+    // atrás de proxy (Render, etc.) o IP real do cliente vem no X-Forwarded-For —
+    // getRemoteAddr() sozinho devolveria sempre o IP do proxy, o que juntaria todo
+    // mundo no mesmo "balde" do rate limiter
+    private String ipDoCliente(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            return forwarded.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
+    }
+
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        if (!rateLimiterService.permitir("login:" + ipDoCliente(request), 10, QUINZE_MINUTOS_MS)) {
+            return ResponseEntity.status(429).build();
+        }
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -76,7 +98,12 @@ public class AuthController {
     }
 
     @PostMapping("/esqueci-senha")
-    public ResponseEntity<Void> esqueciSenha(@Valid @RequestBody EsqueciSenhaDTO dto) {
+    public ResponseEntity<Void> esqueciSenha(@Valid @RequestBody EsqueciSenhaDTO dto, HttpServletRequest request) {
+        // limite mais apertado que o login: esse endpoint dispara email, então também
+        // protege contra usarem o TravelHub pra spammar a caixa de entrada de alguém
+        if (!rateLimiterService.permitir("esqueci-senha:" + ipDoCliente(request), 5, UMA_HORA_MS)) {
+            return ResponseEntity.status(429).build();
+        }
         // sempre 204, exista o email ou não — não dá pra deixar esse endpoint
         // virar um jeito de descobrir quais emails estão cadastrados
         usuarioService.solicitarRecuperacaoSenha(dto.getEmail());
@@ -84,7 +111,10 @@ public class AuthController {
     }
 
     @PostMapping("/redefinir-senha")
-    public ResponseEntity<Void> redefinirSenha(@Valid @RequestBody RedefinirSenhaDTO dto) {
+    public ResponseEntity<Void> redefinirSenha(@Valid @RequestBody RedefinirSenhaDTO dto, HttpServletRequest request) {
+        if (!rateLimiterService.permitir("redefinir-senha:" + ipDoCliente(request), 10, UMA_HORA_MS)) {
+            return ResponseEntity.status(429).build();
+        }
         try {
             usuarioService.redefinirSenha(dto.getToken(), dto.getNovaSenha());
             return ResponseEntity.noContent().build();
@@ -94,7 +124,10 @@ public class AuthController {
     }
 
     @PostMapping("/confirmar-email")
-    public ResponseEntity<Void> confirmarEmail(@Valid @RequestBody ConfirmarEmailDTO dto) {
+    public ResponseEntity<Void> confirmarEmail(@Valid @RequestBody ConfirmarEmailDTO dto, HttpServletRequest request) {
+        if (!rateLimiterService.permitir("confirmar-email:" + ipDoCliente(request), 10, UMA_HORA_MS)) {
+            return ResponseEntity.status(429).build();
+        }
         try {
             usuarioService.confirmarEmail(dto.getToken());
             return ResponseEntity.noContent().build();
@@ -104,7 +137,10 @@ public class AuthController {
     }
 
     @PostMapping("/reenviar-verificacao")
-    public ResponseEntity<Void> reenviarVerificacao(@Valid @RequestBody ReenviarVerificacaoDTO dto) {
+    public ResponseEntity<Void> reenviarVerificacao(@Valid @RequestBody ReenviarVerificacaoDTO dto, HttpServletRequest request) {
+        if (!rateLimiterService.permitir("reenviar-verificacao:" + ipDoCliente(request), 5, UMA_HORA_MS)) {
+            return ResponseEntity.status(429).build();
+        }
         // mesmo padrão do esqueci-senha: sempre 204, não revela se o email existe
         // nem se já estava verificado
         usuarioService.reenviarVerificacao(dto.getEmail());
