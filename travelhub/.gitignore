@@ -33,7 +33,10 @@ build/
 .vscode/
 
 
-application.properties
+# application.properties agora e commitado de proposito: nao tem mais nenhum
+# segredo escrito nele (tudo virou ${VARIAVEL_DE_AMBIENTE}) - e o Render (e
+# qualquer deploy via git) precisa desse arquivo pra ter as propriedades nao
+# sensiveis (jwt.expiration, ddl-auto, etc.), que antes so existiam local.
 
 # uploads de usuários (fotos de perfil)
 uploads/

@@ -61,11 +61,13 @@ app.auth.exigir-verificacao-email=true
 # ativada na conta) — NAO e a senha normal do Gmail.
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
-spring.mail.username=seu_email@gmail.com
+# MAIL_USERNAME e o seu email do Gmail (evita deixar isso escrito direto no
+# arquivo, ja que esse arquivo real acaba sendo commitado)
+spring.mail.username=${MAIL_USERNAME:}
 spring.mail.password=${GMAIL_APP_PASSWORD:}
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
-app.mail.from=seu_email@gmail.com
+app.mail.from=${MAIL_USERNAME:}
 #
 # Opcao B) Resend (https://resend.com) — free tier sem cartao, mas SEM dominio
 # proprio verificado (aba Domains no painel deles) ele so entrega em enderecos
