@@ -103,7 +103,7 @@ com.travelhub.travelhub
   - [x] Divisão seletiva de despesas (por participante) + dashboard financeiro individual e completo
   - [x] Edição e exclusão de evento (restrito ao criador)
   - [x] Página de perfil do usuário
-  - [ ] Frontend de votações (backend já pronto)
+  - [x] Frontend de votações (backend já pronto)
 - [ ] **Sprint 6 — Destino e tipo de evento:**
   - [x] Tipo de evento (Viagem/Saída) — campo, validação, seletor visual nos forms de criar/editar
   - [x] Busca de destino com autocomplete (Geoapify) — implementado, aguardando chave de API real para teste ponta a ponta
