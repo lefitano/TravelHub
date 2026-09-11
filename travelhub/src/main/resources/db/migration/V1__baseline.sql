@@ -66,6 +66,7 @@ CREATE TABLE `despesas` (
 CREATE TABLE `despesa_participantes` (
   `despesa_id` bigint NOT NULL,
   `participante_id` bigint NOT NULL,
+  PRIMARY KEY (`despesa_id`, `participante_id`),
   KEY `FK5u3tfvvxxdqgi7oi979ohm0w2` (`participante_id`),
   KEY `FKcyqiqrxtsbtlfi5wslo2g1qku` (`despesa_id`),
   CONSTRAINT `FK5u3tfvvxxdqgi7oi979ohm0w2` FOREIGN KEY (`participante_id`) REFERENCES `participantes` (`id`),
