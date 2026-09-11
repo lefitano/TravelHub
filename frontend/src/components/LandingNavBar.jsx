@@ -21,7 +21,7 @@ function LandingNavBar() {
     >
       <Container>
         <Navbar.Brand onClick={handleLogoClick} style={{cursor: 'pointer'}} className="logo-gradiente">
-          TravelHub
+          Veyra
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="opcoes-basicas" />
         <Navbar.Collapse id="opcoes-basicas">

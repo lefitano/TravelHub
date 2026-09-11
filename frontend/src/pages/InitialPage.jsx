@@ -22,7 +22,7 @@ export default function InitialPage() {
           <Row className="align-items-center">
             <Col lg={6} className="hero-text">
               <h1>
-                <span className="logo-gradiente">TravelHub</span>
+                <span className="logo-gradiente">Veyra</span>
               </h1>
               <p>Seu organizador de Viagens e Saídas</p>
               <Button className="btn-laranja" onClick={() => navigate("/auth", { state: { modo: "cadastro" } })}>
@@ -86,7 +86,7 @@ export default function InitialPage() {
           <p className="intro">
             Da viagem em grupo ao happy hour de sábado. Todo evento
             compartilhado tem os mesmos desafios: combinar datas, dividir
-            contas e decidir democraticamente. O TravelHub centraliza tudo isso, no
+            contas e decidir democraticamente. O Veyra centraliza tudo isso, no
             lugar do WhatsApp disperso e das planilhas soltas.
           </p>
           <h2>Funcionalidades</h2>

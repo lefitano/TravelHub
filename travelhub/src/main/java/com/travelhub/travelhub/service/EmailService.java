@@ -28,9 +28,9 @@ public class EmailService {
         SimpleMailMessage mensagem = new SimpleMailMessage();
         mensagem.setFrom(remetente);
         mensagem.setTo(destinatario);
-        mensagem.setSubject("TravelHub — Redefinição de senha");
+        mensagem.setSubject("Veyra — Redefinição de senha");
         mensagem.setText(
-            "Você pediu para redefinir sua senha no TravelHub.\n\n" +
+            "Você pediu para redefinir sua senha no Veyra.\n\n" +
             "Clique no link abaixo para escolher uma nova senha (válido por 1 hora):\n" +
             link + "\n\n" +
             "Se você não pediu isso, pode ignorar este email com segurança."
@@ -45,9 +45,9 @@ public class EmailService {
         SimpleMailMessage mensagem = new SimpleMailMessage();
         mensagem.setFrom(remetente);
         mensagem.setTo(destinatario);
-        mensagem.setSubject("TravelHub — Confirme seu cadastro");
+        mensagem.setSubject("Veyra — Confirme seu cadastro");
         mensagem.setText(
-            "Bem-vindo ao TravelHub!\n\n" +
+            "Bem-vindo ao Veyra!\n\n" +
             "Clique no link abaixo pra confirmar seu email e ativar sua conta (válido por 24 horas):\n" +
             link + "\n\n" +
             "Se você não fez esse cadastro, pode ignorar este email com segurança."

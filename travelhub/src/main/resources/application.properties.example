@@ -1,4 +1,4 @@
-spring.application.name=travelhub
+spring.application.name=veyra
 spring.datasource.url=jdbc:mysql://localhost:3306/travelhub
 # use um usuario dedicado, com privilegios so no schema travelhub — nunca o root
 # do MySQL. Exemplo de criacao:

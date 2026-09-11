@@ -26,7 +26,7 @@ function NavBar(){
         >
           <Container>
             <Navbar.Brand onClick = {handleLogoClick} style={{cursor: 'pointer'}} className="logo-gradiente">
-                TravelHub
+                Veyra
             </Navbar.Brand>
             <Nav className="ms-auto">
                 <Nav.Link onClick={() => navigate('/dashboard')}> Painel</Nav.Link>

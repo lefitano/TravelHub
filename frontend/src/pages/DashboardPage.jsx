@@ -96,7 +96,7 @@ export default function DashBoardPage() {
                   fontSize: "0.95rem",
                 }}
               >
-                Bem-vindo de volta ao TravelHub.
+                Bem-vindo de volta ao Veyra.
               </p>
             </div>
           </div>

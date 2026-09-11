@@ -43,7 +43,7 @@ export default function RedefinirSenhaPage(){
             <AuthNavBar onCadastrar={() => navigate('/auth', { state: { modo: 'cadastro' } })} />
             <section className="auth-page">
                 <Container>
-                    <h2 className="auth-titulo">TravelHub</h2>
+                    <h2 className="auth-titulo">Veyra</h2>
                     <Card className="card-auth">
                         <Card.Body>
                             {!token ? (

@@ -1,4 +1,4 @@
-# TravelHub
+# Veyra
 
 Plataforma web para gerenciamento de viagens, excursões e eventos em grupo. Centraliza controle de participantes, despesas, pagamentos, cronogramas e votações em um único sistema.
 
