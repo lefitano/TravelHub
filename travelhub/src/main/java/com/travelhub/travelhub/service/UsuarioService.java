@@ -70,7 +70,23 @@ public class UsuarioService {
         return usuarioRepository.findById(id)
                 .map(usuario -> {
                     usuario.setNome(dto.getNome());
+
+                    // trocar o email precisa exigir confirmação de novo — senão a conta
+                    // continuaria marcada como "verificada" pra um email que na real
+                    // nunca foi confirmado (poderia nem ser dono dele)
+                    boolean emailMudou = !usuario.getEmail().equalsIgnoreCase(dto.getEmail());
                     usuario.setEmail(dto.getEmail());
+
+                    if (emailMudou) {
+                        usuario.setEmailVerificado(false);
+                        String token = gerarTokenAleatorio();
+                        usuario.setTokenVerificacaoEmail(token);
+                        usuario.setTokenVerificacaoExpiracao(LocalDateTime.now().plusHours(24));
+                        Usuario salvo = usuarioRepository.save(usuario);
+                        emailService.enviarEmailVerificacao(salvo.getEmail(), token);
+                        return salvo;
+                    }
+
                     return usuarioRepository.save(usuario);
                 })
                 .orElseThrow(() -> new RuntimeException("Usuario não encontrado"));

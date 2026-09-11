@@ -90,6 +90,8 @@ public class UsuarioController {
             UsuarioResponseDTO dto = new UsuarioResponseDTO(atualizado.getId(), atualizado.getNome(), atualizado.getEmail(), atualizado.getDataCadastro(), atualizado.getFotoUrl());
             return ResponseEntity.ok(dto);
 
+        } catch (DataIntegrityViolationException e){
+            return ResponseEntity.status(409).build();
         } catch (RuntimeException e){
             return ResponseEntity.notFound().build();
         }

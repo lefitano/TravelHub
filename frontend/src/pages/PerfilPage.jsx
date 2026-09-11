@@ -62,13 +62,22 @@ export default function PerfilPage(){
         e.preventDefault()
         setErroPerfil('')
         setSucessoPerfil('')
+        const emailMudou = email !== usuario.email
         try{
             const res = await api.put(`/usuarios/${usuario.id}`, { nome, email })
             setUsuario(res.data)
             login(token, res.data.nome)
-            setSucessoPerfil("Dados atualizados com sucesso!")
-        }catch{
-            setErroPerfil("Não foi possível atualizar seus dados")
+            setSucessoPerfil(
+                emailMudou
+                    ? "Dados atualizados! Como o email mudou, confirme o novo endereço pelo link que enviamos."
+                    : "Dados atualizados com sucesso!"
+            )
+        }catch(error){
+            if(error.response?.status === 409){
+                setErroPerfil("Esse email já está sendo usado por outra conta")
+            }else{
+                setErroPerfil("Não foi possível atualizar seus dados")
+            }
         }
     }
 
