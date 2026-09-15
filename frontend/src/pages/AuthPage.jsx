@@ -69,7 +69,7 @@ export default function AuthPage() {
     setErroCadastroApi('')
     try{
       await api.post('/usuarios' , {nome, email: emailCadastro, senha: senhaCadastro})
-      setSucessoCadastro('Cadastro realizado! Confira seu email pra confirmar a conta antes de entrar.')
+      setSucessoCadastro('Cadastro realizado! Você já pode entrar.')
       setModo('login')
     }catch{
       setErroCadastroApi('Erro ao cadastrar. Verifique os dados e tente novamente')

@@ -40,7 +40,7 @@ public class VotoService {
         Optional<Voto> votoExistente = votoRepository
             .findByParticipante_IdAndOpcaoVoto_Id(participante.getId(), opcaoVotoId);
 
-        if (votoExistente.isPresent()) {
+        if (votoExistente.isPresent()) { 
             votoRepository.delete(votoExistente.get());
             return;
         }
